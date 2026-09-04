@@ -122,7 +122,12 @@
 }
 
 .ticker-track {
-  animation: meridian-ticker 48s linear infinite;
+  animation: meridian-ticker 160s linear infinite;
+}
+
+.ticker:hover .ticker-track,
+.ticker:focus-within .ticker-track {
+  animation-play-state: paused;
 }
 
 @media (prefers-reduced-motion: reduce) {

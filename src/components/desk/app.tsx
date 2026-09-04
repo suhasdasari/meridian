@@ -12,6 +12,7 @@ import { LeadStory } from "./lead";
 import { Wire } from "./wire";
 import { DeskColumn } from "./column";
 import { StoryPanel, clusterFromArticle } from "./story-panel";
+import { articlePeek, PeekProvider, usePeek, usePeekHandlers } from "./peek";
 
 const STORAGE_KEY = "meridian:desk";
 const SEEN_KEY = "meridian:seen";
@@ -31,6 +32,15 @@ function loadSeen(): Set<string> {
 }
 
 export function DeskApp({ initial }: { initial: DeskPayload }) {
+  return (
+    <PeekProvider>
+      <DeskInner initial={initial} />
+    </PeekProvider>
+  );
+}
+
+function DeskInner({ initial }: { initial: DeskPayload }) {
+  const peek = usePeek();
   const [country, setCountry] = useState(initial.country);
   const [tab, setTab] = useState<Tab>("wire");
   const [open, setOpen] = useState<Cluster | null>(null);
@@ -81,11 +91,17 @@ export function DeskApp({ initial }: { initial: DeskPayload }) {
   }, [query.data, query.dataUpdatedAt]);
 
   const ticker = useMemo(() => {
-    const titles = data.wire.slice(0, 18).map((a) => a.title);
-    return [...titles, ...titles];
+    const items = data.wire.slice(0, 18);
+    return [...items, ...items];
   }, [data.wire]);
 
+  function openCluster(cluster: Cluster) {
+    peek.hideNow();
+    setOpen(cluster);
+  }
+
   function openArticle(article: Article) {
+    peek.hideNow();
     const fromLead = data.lead?.articles.some((a) => a.id === article.id);
     if (fromLead && data.lead) {
       setOpen(data.lead);
@@ -108,10 +124,10 @@ export function DeskApp({ initial }: { initial: DeskPayload }) {
       />
 
       {ticker.length > 0 ? (
-        <div className="overflow-hidden border-b border-border py-2" aria-hidden="true">
+        <div className="ticker overflow-hidden border-b border-border py-2">
           <div className="ticker-track flex w-max gap-8 whitespace-nowrap px-4 font-mono text-xs text-muted">
-            {ticker.map((t, i) => (
-              <span key={`${i}-${t.slice(0, 24)}`}>{t}</span>
+            {ticker.map((item, i) => (
+              <TickerItem key={`${i}-${item.id}`} item={item} onOpen={openArticle} />
             ))}
           </div>
         </div>
@@ -127,7 +143,7 @@ export function DeskApp({ initial }: { initial: DeskPayload }) {
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(20rem,0.9fr)] lg:items-stretch">
           <div>
             {data.lead ? (
-              <LeadStory cluster={data.lead} onOpen={setOpen} nowMs={nowMs} />
+              <LeadStory cluster={data.lead} onOpen={openCluster} nowMs={nowMs} />
             ) : query.isLoading ? (
               <Skeleton className="h-72 w-full rounded-xl" />
             ) : (
@@ -177,7 +193,7 @@ export function DeskApp({ initial }: { initial: DeskPayload }) {
               kicker="Desk one"
               title="World affairs"
               clusters={data.affairs}
-              onOpen={setOpen}
+              onOpen={openCluster}
               nowMs={nowMs}
             />
           ) : null}
@@ -186,7 +202,7 @@ export function DeskApp({ initial }: { initial: DeskPayload }) {
               kicker="Desk two"
               title="Planet"
               clusters={data.planet}
-              onOpen={setOpen}
+              onOpen={openCluster}
               nowMs={nowMs}
             />
           ) : null}
@@ -197,14 +213,14 @@ export function DeskApp({ initial }: { initial: DeskPayload }) {
             kicker="Desk one"
             title="World affairs"
             clusters={data.affairs}
-            onOpen={setOpen}
+            onOpen={openCluster}
             nowMs={nowMs}
           />
           <DeskColumn
             kicker="Desk two"
             title="Planet"
             clusters={data.planet}
-            onOpen={setOpen}
+            onOpen={openCluster}
             nowMs={nowMs}
           />
         </div>
@@ -222,5 +238,29 @@ export function DeskApp({ initial }: { initial: DeskPayload }) {
 
       {open ? <StoryPanel cluster={open} onClose={() => setOpen(null)} nowMs={nowMs} /> : null}
     </div>
+  );
+}
+
+function TickerItem({
+  item,
+  onOpen,
+}: {
+  item: Article;
+  onOpen: (article: Article) => void;
+}) {
+  const peek = usePeek();
+  const handlers = usePeekHandlers(articlePeek(item));
+  return (
+    <button
+      type="button"
+      {...handlers}
+      onClick={() => {
+        peek.hideNow();
+        onOpen(item);
+      }}
+      className="whitespace-nowrap bg-transparent p-0 text-left hover:text-fg"
+    >
+      {item.title}
+    </button>
   );
 }

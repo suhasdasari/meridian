@@ -2,6 +2,41 @@
 
 import type { Cluster } from "@/lib/news/types";
 import { formatAge } from "@/lib/news/format";
+import { clusterPeek, usePeek, usePeekHandlers } from "./peek";
+
+function ColumnRow({
+  cluster,
+  onOpen,
+  nowMs,
+}: {
+  cluster: Cluster;
+  onOpen: (cluster: Cluster) => void;
+  nowMs: number;
+}) {
+  const peek = usePeek();
+  const handlers = usePeekHandlers(clusterPeek(cluster));
+  return (
+    <li>
+      <button
+        type="button"
+        {...handlers}
+        onClick={() => {
+          peek.hideNow();
+          onOpen(cluster);
+        }}
+        className="w-full py-3.5 text-left transition-opacity duration-150 hover:opacity-80"
+      >
+        <p className="font-display text-lg font-medium leading-snug text-fg">{cluster.title}</p>
+        <p className="mt-1.5 font-mono text-xs text-subtle">
+          {cluster.sourceCount > 1
+            ? `${cluster.sourceCount} outlets`
+            : cluster.articles[0]?.source}
+          <span className="text-subtle"> · {formatAge(cluster.publishedAt, nowMs)}</span>
+        </p>
+      </button>
+    </li>
+  );
+}
 
 export function DeskColumn({
   kicker,
@@ -22,21 +57,7 @@ export function DeskColumn({
       <h2 className="mt-1 font-display text-2xl font-medium text-fg">{title}</h2>
       <ul className="mt-4 divide-y divide-border">
         {clusters.map((cluster) => (
-          <li key={cluster.id}>
-            <button
-              type="button"
-              onClick={() => onOpen(cluster)}
-              className="w-full py-3.5 text-left transition-opacity duration-150 hover:opacity-80"
-            >
-              <p className="font-display text-lg font-medium leading-snug text-fg">{cluster.title}</p>
-              <p className="mt-1.5 font-mono text-xs text-subtle">
-                {cluster.sourceCount > 1
-                  ? `${cluster.sourceCount} outlets`
-                  : cluster.articles[0]?.source}
-                <span className="text-subtle"> · {formatAge(cluster.publishedAt, nowMs)}</span>
-              </p>
-            </button>
-          </li>
+          <ColumnRow key={cluster.id} cluster={cluster} onOpen={onOpen} nowMs={nowMs} />
         ))}
       </ul>
     </section>

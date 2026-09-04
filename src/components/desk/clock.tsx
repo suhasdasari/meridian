@@ -13,13 +13,12 @@ export function LiveClock({ initialIso }: { initialIso: string }) {
   }, []);
 
   return (
-    <div className="flex flex-col items-end gap-0.5 text-right">
-      <p className="font-mono text-xs tracking-wider text-muted uppercase tabular-nums">
-        {formatEditionDate(now)}
-      </p>
-      <p className="font-mono text-sm text-fg tabular-nums" suppressHydrationWarning>
-        {formatUtcClock(now)} <span className="text-subtle">UTC</span>
-      </p>
-    </div>
+    <p className="font-mono text-xs tracking-wider text-muted uppercase tabular-nums">
+      <span className="hidden sm:inline">{formatEditionDate(now)} · </span>
+      <span className="text-fg" suppressHydrationWarning>
+        {formatUtcClock(now)}
+      </span>{" "}
+      <span className="text-subtle">UTC</span>
+    </p>
   );
 }

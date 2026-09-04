@@ -27,7 +27,7 @@ function WireRow({
           onOpen(item);
         }}
         className={cn(
-          "grid w-full grid-cols-[0.5rem_3.25rem_minmax(0,1fr)] items-start gap-2 rounded-md px-3 py-2.5 text-left transition-colors duration-150 hover:bg-elevated",
+          "grid w-full grid-cols-[0.5rem_3.25rem_minmax(0,1fr)] items-start gap-2 rounded-md px-2 py-1.5 text-left transition-colors duration-150 hover:bg-elevated",
           isNew && "bg-elevated/40",
         )}
       >
@@ -60,8 +60,8 @@ export function Wire({
   onOpen: (article: Article) => void;
 }) {
   return (
-    <section className="flex h-full min-h-0 flex-col rounded-xl bg-surface shadow-[var(--shadow-border)]">
-      <header className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+    <section className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg bg-surface shadow-[var(--shadow-border)]">
+      <header className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-3 py-2">
         <div className="flex items-center gap-2">
           <span className="live-dot size-1.5 rounded-full bg-mark" aria-hidden="true" />
           <h2 className="font-mono text-xs tracking-kicker text-muted uppercase">The wire</h2>

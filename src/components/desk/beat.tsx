@@ -59,11 +59,15 @@ export function BeatRail({ beat }: { beat: Beat }) {
 
 export function BeatLegend() {
   return (
-    <ul className="flex flex-wrap items-center gap-x-4 gap-y-2">
+    <ul className="flex items-center gap-3">
       {LEGEND_BEATS.map((beat) => (
-        <li key={beat} className="inline-flex items-center gap-1.5">
-          <span className={cn("size-1.5 rounded-full", BEAT_DOT[beat])} aria-hidden="true" />
-          <span className="font-mono text-xs tracking-kicker text-subtle uppercase">{BEAT_LABEL[beat]}</span>
+        <li key={beat}>
+          <span className="inline-flex items-center gap-1.5" title={BEAT_LABEL[beat]}>
+            <span className={cn("size-1.5 rounded-full", BEAT_DOT[beat])} aria-hidden="true" />
+            <span className="hidden font-mono text-xs tracking-kicker text-subtle uppercase xl:inline">
+              {BEAT_LABEL[beat]}
+            </span>
+          </span>
         </li>
       ))}
     </ul>

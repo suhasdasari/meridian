@@ -44,7 +44,7 @@ export function CountrySelect({
       <Button
         type="button"
         variant="outline"
-        className="h-11 min-w-44 justify-between rounded-lg px-3.5 font-medium"
+        className="h-9 min-w-36 justify-between rounded-md px-3 font-medium"
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}

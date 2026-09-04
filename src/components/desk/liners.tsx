@@ -15,10 +15,12 @@ export function OneLiners({
   nowMs: number;
 }) {
   return (
-    <section className="rounded-xl bg-surface p-4 shadow-[var(--shadow-border)] md:p-5">
-      <p className="font-mono text-xs tracking-kicker text-subtle uppercase">In brief</p>
-      <h2 className="mt-1 font-display text-2xl font-medium text-fg">One line</h2>
-      <ol className="mt-4 divide-y divide-border">
+    <section className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg bg-surface shadow-[var(--shadow-border)]">
+      <header className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-3 py-2">
+        <h2 className="font-mono text-xs tracking-kicker text-muted uppercase">One line</h2>
+        <p className="font-mono text-xs text-subtle tabular-nums">{items.length}</p>
+      </header>
+      <ol className="min-h-0 flex-1 overflow-y-auto px-1 py-1">
         {items.map((item, i) => (
           <LinerRow key={item.id} item={item} index={i + 1} onOpen={onOpen} nowMs={nowMs} />
         ))}
@@ -49,7 +51,7 @@ function LinerRow({
           peek.hideNow();
           onOpen(item);
         }}
-        className="-mx-2 grid w-full grid-cols-[0.5rem_2rem_minmax(0,1fr)] items-start gap-3 rounded-md px-2 py-3 text-left transition-colors duration-150 hover:bg-elevated"
+        className="grid w-full grid-cols-[0.5rem_1.5rem_minmax(0,1fr)] items-start gap-2 rounded-md px-2 py-1.5 text-left transition-colors duration-150 hover:bg-elevated"
       >
         <BeatRail beat={item.beat} />
         <span className="font-mono text-xs text-subtle tabular-nums">{String(index).padStart(2, "0")}</span>

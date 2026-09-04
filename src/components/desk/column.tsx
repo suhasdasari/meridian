@@ -25,11 +25,11 @@ function ColumnRow({
           peek.hideNow();
           onOpen(cluster);
         }}
-        className="w-full py-3.5 text-left transition-opacity duration-150 hover:opacity-80"
+        className="w-full py-2 text-left transition-opacity duration-150 hover:opacity-80"
       >
-        <BeatKicker beat={cluster.beat} className="mb-1" />
-        <p className="font-display text-lg font-medium leading-snug text-fg">{cluster.title}</p>
-        <p className="mt-1.5 font-mono text-xs text-subtle">
+        <BeatKicker beat={cluster.beat} className="mb-0.5" />
+        <p className="line-clamp-2 font-display text-sm font-medium leading-snug text-fg">{cluster.title}</p>
+        <p className="mt-1 font-mono text-xs text-subtle">
           {cluster.sourceCount > 1
             ? `${cluster.sourceCount} outlets`
             : cluster.articles[0]?.source}
@@ -54,10 +54,12 @@ export function DeskColumn({
   nowMs: number;
 }) {
   return (
-    <section className="rounded-xl bg-surface p-4 shadow-[var(--shadow-border)] md:p-5">
-      <p className="font-mono text-xs tracking-kicker text-subtle uppercase">{kicker}</p>
-      <h2 className="mt-1 font-display text-2xl font-medium text-fg">{title}</h2>
-      <ul className="mt-4 divide-y divide-border">
+    <section className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg bg-surface shadow-[var(--shadow-border)]">
+      <header className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-3 py-2">
+        <h2 className="font-mono text-xs tracking-kicker text-muted uppercase">{title}</h2>
+        <p className="font-mono text-xs text-subtle tabular-nums">{clusters.length}</p>
+      </header>
+      <ul className="min-h-0 flex-1 overflow-y-auto px-3 py-1">
         {clusters.map((cluster) => (
           <ColumnRow key={cluster.id} cluster={cluster} onOpen={onOpen} nowMs={nowMs} />
         ))}

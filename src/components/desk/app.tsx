@@ -18,7 +18,7 @@ import { OneLiners } from "./liners";
 const STORAGE_KEY = "meridian:desk";
 const SEEN_KEY = "meridian:seen";
 
-type Tab = "wire" | "affairs" | "planet";
+type Tab = "wire" | "liners" | "affairs" | "planet";
 
 function loadSeen(): Set<string> {
   if (typeof window === "undefined") return new Set();
@@ -126,7 +126,7 @@ function DeskInner({ initial }: { initial: DeskPayload }) {
   }
 
   return (
-    <div className="min-h-dvh bg-bg text-fg">
+    <div className="flex h-dvh flex-col overflow-hidden bg-bg text-fg">
       <Masthead
         country={country}
         onCountry={setCountry}
@@ -136,7 +136,7 @@ function DeskInner({ initial }: { initial: DeskPayload }) {
       />
 
       {ticker.length > 0 ? (
-        <div className="ticker overflow-hidden border-b border-border py-2">
+        <div className="ticker shrink-0 overflow-hidden border-b border-border py-1.5">
           <div className="ticker-track flex w-max gap-8 whitespace-nowrap px-4 font-mono text-xs text-muted">
             {ticker.map((item, i) => (
               <TickerItem key={`${i}-${item.id}`} item={item} onOpen={openArticle} />
@@ -145,9 +145,9 @@ function DeskInner({ initial }: { initial: DeskPayload }) {
         </div>
       ) : null}
 
-      <main className="mx-auto max-w-7xl px-4 py-5 md:px-6 md:py-7">
+      <main className="min-h-0 flex-1 px-2 py-2 md:px-3">
         {query.isError && !query.data ? (
-          <p className="rounded-xl bg-surface px-5 py-8 text-sm text-muted shadow-[var(--shadow-border)]">
+          <p className="rounded-lg bg-surface px-5 py-8 text-sm text-muted shadow-[var(--shadow-border)]">
             The desk could not reach live feeds just now. Try again in a moment.
           </p>
         ) : null}
@@ -167,24 +167,55 @@ function DeskInner({ initial }: { initial: DeskPayload }) {
           <CountryDesk
             data={data}
             nowMs={nowMs}
+            tab={tab}
+            setTab={setTab}
             seen={seen}
             loading={query.isLoading}
             onOpenCluster={openCluster}
             onOpenArticle={openArticle}
           />
         )}
-
-        <footer className="mt-10 max-w-3xl pb-10 text-sm leading-relaxed text-subtle">
-          <p>
-            {isWorld
-              ? "Meridian does not editorialize, score sentiment, or rewrite headlines. The pictured ten are the most-covered stories with photographs this cycle. World affairs and planet desks appear only on the world edition. Colour marks name a topic from the published words — not a ranking."
-              : `This is the ${data.countryName} desk. World affairs and planet run only on the world edition. Headlines are as published. Colour marks are topical (money, conflict, crime, accident, civic, politics, faith, humor) from the published words — not a ranking.`}
-          </p>
-        </footer>
       </main>
 
       {open ? <StoryPanel cluster={open} onClose={() => setOpen(null)} nowMs={nowMs} /> : null}
     </div>
+  );
+}
+
+function PicturedSlot({
+  data,
+  loading,
+  onOpen,
+  nowMs,
+}: {
+  data: DeskPayload;
+  loading: boolean;
+  onOpen: (cluster: Cluster) => void;
+  nowMs: number;
+}) {
+  if (data.gallery.length > 0) {
+    return (
+      <CountryGallery
+        clusters={data.gallery}
+        countryName={data.countryName}
+        onOpen={onOpen}
+        nowMs={nowMs}
+      />
+    );
+  }
+  if (loading) {
+    return (
+      <div className="pictured-grid">
+        {Array.from({ length: 10 }).map((_, i) => (
+          <Skeleton key={i} className="h-full w-full rounded-lg" />
+        ))}
+      </div>
+    );
+  }
+  return (
+    <p className="flex h-full items-center rounded-lg bg-surface px-5 text-sm text-muted shadow-[var(--shadow-border)]">
+      No pictured stories this cycle.
+    </p>
   );
 }
 
@@ -208,44 +239,16 @@ function WorldDesk({
   onOpenArticle: (article: Article) => void;
 }) {
   return (
-    <>
-      {data.gallery.length > 0 ? (
-        <CountryGallery
-          clusters={data.gallery}
-          countryName={data.countryName}
-          onOpen={onOpenCluster}
-          nowMs={nowMs}
-        />
-      ) : loading ? (
-        <div className="pictured-grid">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <Skeleton key={i} className="h-full w-full rounded-lg" />
-          ))}
-        </div>
-      ) : (
-        <p className="rounded-xl bg-surface px-5 py-8 text-sm text-muted shadow-[var(--shadow-border)]">
-          No pictured stories this cycle. The wire below still lists what arrived.
-        </p>
-      )}
-
-      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.9fr)]">
-        {data.liners.length > 0 ? (
-          <OneLiners items={data.liners} onOpen={onOpenArticle} nowMs={nowMs} />
-        ) : (
-          <div className="rounded-xl bg-surface px-5 py-8 text-sm text-muted shadow-[var(--shadow-border)]">
-            One-liners will fill as copy arrives.
-          </div>
-        )}
-        <div className="hidden min-h-96 lg:block">
-          <Wire items={data.wire} seen={seen} onOpen={onOpenArticle} />
-        </div>
+    <div className="desk-world">
+      <div className="min-h-0 [grid-area:pics]">
+        <PicturedSlot data={data} loading={loading} onOpen={onOpenCluster} nowMs={nowMs} />
       </div>
-
-      <div className="mt-4 flex gap-2 lg:hidden">
+      <div className="flex gap-1 [grid-area:tabs] lg:hidden">
         {(
           [
             ["wire", "Wire"],
-            ["affairs", "World affairs"],
+            ["liners", "Brief"],
+            ["affairs", "Affairs"],
             ["planet", "Planet"],
           ] as const
         ).map(([id, label]) => (
@@ -254,19 +257,17 @@ function WorldDesk({
             type="button"
             variant={tab === id ? "default" : "outline"}
             size="sm"
-            className="h-11 flex-1 rounded-lg"
+            className="h-9 flex-1 rounded-md"
             onClick={() => setTab(id)}
           >
             {label}
           </Button>
         ))}
       </div>
-
-      <div className="mt-4 lg:hidden">
-        {tab === "wire" ? (
-          <div className="h-96">
-            <Wire items={data.wire} seen={seen} onOpen={onOpenArticle} />
-          </div>
+      <div className="min-h-0 [grid-area:panel] lg:hidden">
+        {tab === "wire" ? <Wire items={data.wire} seen={seen} onOpen={onOpenArticle} /> : null}
+        {tab === "liners" ? (
+          <OneLiners items={data.liners} onOpen={onOpenArticle} nowMs={nowMs} />
         ) : null}
         {tab === "affairs" ? (
           <DeskColumn
@@ -287,8 +288,13 @@ function WorldDesk({
           />
         ) : null}
       </div>
-
-      <div className="mt-4 hidden grid-cols-2 gap-4 lg:grid">
+      <div className="hidden min-h-0 [grid-area:wire] lg:block">
+        <Wire items={data.wire} seen={seen} onOpen={onOpenArticle} />
+      </div>
+      <div className="hidden min-h-0 [grid-area:liners] lg:block">
+        <OneLiners items={data.liners} onOpen={onOpenArticle} nowMs={nowMs} />
+      </div>
+      <div className="hidden min-h-0 [grid-area:affairs] lg:block">
         <DeskColumn
           kicker="Desk one"
           title="World affairs"
@@ -296,6 +302,8 @@ function WorldDesk({
           onOpen={onOpenCluster}
           nowMs={nowMs}
         />
+      </div>
+      <div className="hidden min-h-0 [grid-area:planet] lg:block">
         <DeskColumn
           kicker="Desk two"
           title="Planet"
@@ -304,13 +312,15 @@ function WorldDesk({
           nowMs={nowMs}
         />
       </div>
-    </>
+    </div>
   );
 }
 
 function CountryDesk({
   data,
   nowMs,
+  tab,
+  setTab,
   seen,
   loading,
   onOpenCluster,
@@ -318,45 +328,51 @@ function CountryDesk({
 }: {
   data: DeskPayload;
   nowMs: number;
+  tab: Tab;
+  setTab: (tab: Tab) => void;
   seen: Set<string>;
   loading: boolean;
   onOpenCluster: (cluster: Cluster) => void;
   onOpenArticle: (article: Article) => void;
 }) {
   return (
-    <>
-      {data.gallery.length > 0 ? (
-        <CountryGallery
-          clusters={data.gallery}
-          countryName={data.countryName}
-          onOpen={onOpenCluster}
-          nowMs={nowMs}
-        />
-      ) : loading ? (
-        <div className="pictured-grid">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <Skeleton key={i} className="h-full w-full rounded-lg" />
-          ))}
-        </div>
-      ) : (
-        <p className="rounded-xl bg-surface px-5 py-8 text-sm text-muted shadow-[var(--shadow-border)]">
-          No pictured stories for this desk yet. The wire below still lists what arrived.
-        </p>
-      )}
-
-      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.9fr)]">
-        {data.liners.length > 0 ? (
+    <div className="desk-country">
+      <div className="min-h-0 [grid-area:pics]">
+        <PicturedSlot data={data} loading={loading} onOpen={onOpenCluster} nowMs={nowMs} />
+      </div>
+      <div className="flex gap-1 [grid-area:tabs] lg:hidden">
+        {(
+          [
+            ["wire", "Wire"],
+            ["liners", "Brief"],
+          ] as const
+        ).map(([id, label]) => (
+          <Button
+            key={id}
+            type="button"
+            variant={tab === id ? "default" : "outline"}
+            size="sm"
+            className="h-9 flex-1 rounded-md"
+            onClick={() => setTab(id)}
+          >
+            {label}
+          </Button>
+        ))}
+      </div>
+      <div className="min-h-0 [grid-area:panel] lg:hidden">
+        {tab === "liners" ? (
           <OneLiners items={data.liners} onOpen={onOpenArticle} nowMs={nowMs} />
         ) : (
-          <div className="rounded-xl bg-surface px-5 py-8 text-sm text-muted shadow-[var(--shadow-border)]">
-            One-liners will fill as local copy arrives.
-          </div>
-        )}
-        <div className="min-h-96">
           <Wire items={data.wire} seen={seen} onOpen={onOpenArticle} />
-        </div>
+        )}
       </div>
-    </>
+      <div className="hidden min-h-0 [grid-area:wire] lg:block">
+        <Wire items={data.wire} seen={seen} onOpen={onOpenArticle} />
+      </div>
+      <div className="hidden min-h-0 [grid-area:liners] lg:block">
+        <OneLiners items={data.liners} onOpen={onOpenArticle} nowMs={nowMs} />
+      </div>
+    </div>
   );
 }
 

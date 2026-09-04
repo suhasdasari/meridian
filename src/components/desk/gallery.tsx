@@ -18,15 +18,15 @@ export function CountryGallery({
   nowMs: number;
 }) {
   return (
-    <section>
-      <div className="mb-2 flex items-baseline justify-between gap-3">
-        <h2 className="font-display text-xl font-medium text-fg">
+    <section className="flex h-full min-h-0 flex-col">
+      <div className="mb-1.5 flex shrink-0 items-baseline justify-between gap-3">
+        <h2 className="font-display text-base font-medium text-fg">
           <span className="font-mono text-xs tracking-kicker text-subtle uppercase">Pictured · </span>
           {countryName} · ten
         </h2>
         <p className="font-mono text-xs text-subtle tabular-nums">{clusters.length}</p>
       </div>
-      <ul className="pictured-grid">
+      <ul className="pictured-grid min-h-0 flex-1">
         {clusters.map((cluster) => (
           <li key={cluster.id} className="min-h-0">
             <GalleryCard cluster={cluster} onOpen={onOpen} nowMs={nowMs} />

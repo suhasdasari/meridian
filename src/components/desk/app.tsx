@@ -8,7 +8,6 @@ import { COUNTRIES } from "@/lib/news/countries";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Masthead } from "./masthead";
-import { LeadStory } from "./lead";
 import { Wire } from "./wire";
 import { DeskColumn } from "./column";
 import { StoryPanel, clusterFromArticle } from "./story-panel";
@@ -95,15 +94,13 @@ function DeskInner({ initial }: { initial: DeskPayload }) {
   }, [query.data, query.dataUpdatedAt]);
 
   const ticker = useMemo(() => {
-    const items = isWorld
-      ? data.wire.slice(0, 18)
-      : [
-          ...data.gallery.map((c) => c.articles[0]).filter((a): a is Article => Boolean(a)),
-          ...data.liners,
-          ...data.wire,
-        ].slice(0, 18);
+    const items = [
+      ...data.gallery.map((c) => c.articles[0]).filter((a): a is Article => Boolean(a)),
+      ...data.liners,
+      ...data.wire,
+    ].slice(0, 18);
     return [...items, ...items];
-  }, [data.gallery, data.liners, data.wire, isWorld]);
+  }, [data.gallery, data.liners, data.wire]);
 
   function openCluster(cluster: Cluster) {
     peek.hideNow();
@@ -180,7 +177,7 @@ function DeskInner({ initial }: { initial: DeskPayload }) {
         <footer className="mt-10 max-w-3xl pb-10 text-sm leading-relaxed text-subtle">
           <p>
             {isWorld
-              ? "Meridian does not editorialize, score sentiment, or rewrite headlines. The lead is the cluster with the most independent outlets in this cycle, weighted only by recency and geographic spread of coverage. World affairs and planet desks appear only on the world edition. Colour marks name a topic from the published words (money, conflict, crime, accident, civic, politics, faith, humor) — not a ranking."
+              ? "Meridian does not editorialize, score sentiment, or rewrite headlines. The pictured ten are the most-covered stories with photographs this cycle. World affairs and planet desks appear only on the world edition. Colour marks name a topic from the published words — not a ranking."
               : `This is the ${data.countryName} desk. World affairs and planet run only on the world edition. Headlines are as published. Colour marks are topical (money, conflict, crime, accident, civic, politics, faith, humor) from the published words — not a ranking.`}
           </p>
         </footer>
@@ -212,20 +209,34 @@ function WorldDesk({
 }) {
   return (
     <>
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(20rem,0.9fr)] lg:items-stretch">
-        <div>
-          {data.lead ? (
-            <LeadStory cluster={data.lead} onOpen={onOpenCluster} nowMs={nowMs} />
-          ) : loading ? (
-            <Skeleton className="h-72 w-full rounded-xl" />
-          ) : (
-            <div className="rounded-xl bg-surface px-5 py-10 shadow-[var(--shadow-border)]">
-              <p className="font-mono text-xs tracking-kicker text-subtle uppercase">Lead</p>
-              <p className="mt-2 font-display text-2xl text-fg">No clustered lead this cycle.</p>
-            </div>
-          )}
+      {data.gallery.length > 0 ? (
+        <CountryGallery
+          clusters={data.gallery}
+          countryName={data.countryName}
+          onOpen={onOpenCluster}
+          nowMs={nowMs}
+        />
+      ) : loading ? (
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <Skeleton key={i} className="aspect-video w-full rounded-xl" />
+          ))}
         </div>
-        <div className="hidden h-96 lg:block">
+      ) : (
+        <p className="rounded-xl bg-surface px-5 py-8 text-sm text-muted shadow-[var(--shadow-border)]">
+          No pictured stories this cycle. The wire below still lists what arrived.
+        </p>
+      )}
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.9fr)]">
+        {data.liners.length > 0 ? (
+          <OneLiners items={data.liners} onOpen={onOpenArticle} nowMs={nowMs} />
+        ) : (
+          <div className="rounded-xl bg-surface px-5 py-8 text-sm text-muted shadow-[var(--shadow-border)]">
+            One-liners will fill as copy arrives.
+          </div>
+        )}
+        <div className="hidden min-h-96 lg:block">
           <Wire items={data.wire} seen={seen} onOpen={onOpenArticle} />
         </div>
       </div>

@@ -1,5 +1,5 @@
 import type { Article, DeskPayload } from "./types";
-import { clusterArticles, pickGallery, pickLead } from "./cluster";
+import { clusterArticles, pickGallery } from "./cluster";
 import { findCountry } from "./countries";
 import {
   bingCountryFeed,
@@ -177,35 +177,7 @@ export async function loadDesk(countryCode: string): Promise<DeskPayload> {
 
   const articles = dedupe(collected);
   const isWorld = country.code === "WORLD";
-  const forCluster = articles.slice(0, isWorld ? 140 : 220);
-  const clusters = clusterArticles(forCluster);
-
-  if (isWorld) {
-    const lead = pickLead(clusters);
-    const used = new Set(lead ? lead.articles.map((a) => a.id) : []);
-    const rest = clusters.filter((c) => c.id !== lead?.id);
-    const affairs = rest.filter((c) => c.desk === "affairs").slice(0, 16);
-    const planet = rest.filter((c) => c.desk === "planet").slice(0, 16);
-    const wire = articles
-      .filter((a) => !used.has(a.id))
-      .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))
-      .slice(0, 140);
-    return {
-      country: country.code,
-      countryName: country.name,
-      generatedAt: new Date().toISOString(),
-      lead,
-      gallery: [],
-      liners: [],
-      wire,
-      affairs,
-      planet,
-      sourceCount: okNames.size,
-      articleCount: articles.length,
-      failedSources,
-    };
-  }
-
+  const clusters = clusterArticles(articles.slice(0, 220));
   const gallery = pickGallery(clusters, articles, 10);
   const used = new Set(gallery.flatMap((c) => c.articles.map((a) => a.id)));
   const remaining = articles
@@ -213,7 +185,8 @@ export async function loadDesk(countryCode: string): Promise<DeskPayload> {
     .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
   const liners = remaining.slice(0, 28);
   const linerIds = new Set(liners.map((a) => a.id));
-  const wire = remaining.filter((a) => !linerIds.has(a.id)).slice(0, 160);
+  const wire = remaining.filter((a) => !linerIds.has(a.id)).slice(0, isWorld ? 140 : 160);
+  const restClusters = clusters.filter((c) => !c.articles.some((a) => used.has(a.id)));
 
   return {
     country: country.code,
@@ -223,8 +196,8 @@ export async function loadDesk(countryCode: string): Promise<DeskPayload> {
     gallery,
     liners,
     wire,
-    affairs: [],
-    planet: [],
+    affairs: isWorld ? restClusters.filter((c) => c.desk === "affairs").slice(0, 16) : [],
+    planet: isWorld ? restClusters.filter((c) => c.desk === "planet").slice(0, 16) : [],
     sourceCount: okNames.size,
     articleCount: articles.length,
     failedSources,

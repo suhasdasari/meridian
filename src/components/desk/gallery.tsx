@@ -21,8 +21,8 @@ export function CountryGallery({
     <section className="flex min-h-0 flex-col md:h-full">
       <div className="mb-1.5 flex shrink-0 items-baseline justify-between gap-3">
         <h2 className="font-display text-base font-medium text-fg md:text-base">
-          <span className="font-mono text-xs tracking-kicker text-subtle uppercase">Pictured · </span>
-          {countryName} · ten
+          <span className="font-mono text-xs tracking-kicker text-subtle uppercase">Pictured · ten · </span>
+          {countryName}
         </h2>
         <p className="font-mono text-xs text-subtle tabular-nums">{clusters.length}</p>
       </div>

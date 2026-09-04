@@ -104,7 +104,7 @@ function parseFeed(feed: Feed, body: string): Article[] {
 
 async function loadFeed(feed: Feed): Promise<CacheEntry> {
   const url = feed.kind === "wikipedia" ? wikipediaFeaturedUrl() : feed.url;
-  const cached = feedCache.get(`${feed.id}:v7`);
+  const cached = feedCache.get(`${feed.id}:v8`);
   const now = Date.now();
   if (cached && now - cached.at < CACHE_TTL_MS) return cached;
 
@@ -115,18 +115,29 @@ async function loadFeed(feed: Feed): Promise<CacheEntry> {
       origin: feed.id,
     }));
     const entry: CacheEntry = { at: now, articles, ok: true };
-    feedCache.set(`${feed.id}:v7`, entry);
+    feedCache.set(`${feed.id}:v8`, entry);
     return entry;
   } catch {
     if (cached && now - cached.at < STALE_MS) return cached;
     const entry: CacheEntry = { at: now, articles: [], ok: false };
-    feedCache.set(`${feed.id}:v7`, entry);
+    feedCache.set(`${feed.id}:v8`, entry);
     return entry;
   }
 }
 
 function feedsFor(country: string): Feed[] {
-  if (country === "WORLD") return WORLD_FEEDS;
+  if (country === "WORLD") {
+    const pictured = WORLD_FEEDS.filter((f) => f.kind !== "rss" || !f.id.startsWith("gn-"));
+    const google = WORLD_FEEDS.filter((f) => f.id.startsWith("gn-"));
+    const gdelt = pictured.filter((f) => f.kind === "gdelt");
+    const rest = pictured.filter((f) => f.kind !== "gdelt");
+    return [
+      ...gdelt,
+      bingCountryFeed("WORLD", "world", "International"),
+      ...rest,
+      ...google,
+    ];
+  }
   const info = findCountry(country);
   const local = REGION_FEEDS[info.code] ?? [];
   return [
@@ -160,7 +171,7 @@ export async function loadDesk(countryCode: string): Promise<DeskPayload> {
   const started = Date.now();
   const results = await mapPool(feeds, CONCURRENCY, async (feed) => {
     if (Date.now() - started > BUDGET_MS) {
-      return feedCache.get(`${feed.id}:v7`) ?? { at: 0, articles: [], ok: false };
+      return feedCache.get(`${feed.id}:v8`) ?? { at: 0, articles: [], ok: false };
     }
     return loadFeed(feed);
   });

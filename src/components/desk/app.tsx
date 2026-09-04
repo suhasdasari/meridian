@@ -294,7 +294,7 @@ function WorldDesk({
       <div className="hidden min-h-0 [grid-area:liners] lg:block">
         <OneLiners items={data.liners} onOpen={onOpenArticle} nowMs={nowMs} />
       </div>
-      <div className="hidden min-h-0 [grid-area:affairs] lg:block">
+      <div className="hidden min-h-0 [grid-area:affairs] 2xl:block">
         <DeskColumn
           kicker="Desk one"
           title="World affairs"
@@ -303,7 +303,7 @@ function WorldDesk({
           nowMs={nowMs}
         />
       </div>
-      <div className="hidden min-h-0 [grid-area:planet] lg:block">
+      <div className="hidden min-h-0 [grid-area:planet] 2xl:block">
         <DeskColumn
           kicker="Desk two"
           title="Planet"

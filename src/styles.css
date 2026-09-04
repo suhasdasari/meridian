@@ -239,20 +239,22 @@
 }
 
 @media (min-width: 1024px) {
-  .desk-world {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(16rem, 20rem);
-    grid-template-rows: minmax(0, 1.3fr) minmax(0, 1fr);
-    grid-template-areas:
-      "pics pics pics wire"
-      "liners affairs planet wire";
-  }
-
+  .desk-world,
   .desk-country {
     grid-template-columns: minmax(0, 1fr) minmax(18rem, 22rem);
     grid-template-rows: minmax(0, 1.15fr) minmax(0, 0.85fr);
     grid-template-areas:
       "pics wire"
       "pics liners";
+  }
+}
+
+@media (min-width: 1536px) {
+  .desk-world {
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 18rem) minmax(16rem, 18rem);
+    grid-template-areas:
+      "pics wire affairs"
+      "pics liners planet";
   }
 }
 

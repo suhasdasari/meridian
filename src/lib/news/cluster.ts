@@ -193,3 +193,52 @@ export function pickLead(clusters: Cluster[]): Cluster | null {
   scored.sort((a, b) => b.score - a.score);
   return scored[0]?.c ?? null;
 }
+
+export function pickGallery(clusters: Cluster[], articles: Article[] = [], n = 10): Cluster[] {
+  const seen = new Set<string>();
+  const out: Cluster[] = [];
+  const keyOf = (title: string) =>
+    title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim().slice(0, 80);
+
+  const push = (c: Cluster) => {
+    const key = keyOf(c.title);
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    out.push(c);
+    return out.length >= n;
+  };
+
+  const pictured = clusters
+    .filter((c) => c.imageUrl)
+    .sort((a, b) => {
+      if (b.sourceCount !== a.sourceCount) return b.sourceCount - a.sourceCount;
+      return b.publishedAt.localeCompare(a.publishedAt);
+    });
+  for (const c of pictured) if (push(c)) return out;
+
+  const used = new Set(out.flatMap((c) => c.articles.map((a) => a.id)));
+  const leftover = articles
+    .filter((a) => a.imageUrl && !used.has(a.id))
+    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+  for (const a of leftover) {
+    const filled: Cluster = {
+      id: a.id,
+      title: a.title,
+      excerpt: a.excerpt,
+      imageUrl: a.imageUrl,
+      publishedAt: a.publishedAt,
+      articles: [a],
+      sourceCount: 1,
+      regions: [a.region],
+      desk: a.desk,
+      major: false,
+    };
+    if (push(filled)) return out;
+  }
+
+  for (const c of clusters) {
+    if (c.imageUrl) continue;
+    if (push(c)) return out;
+  }
+  return out;
+}

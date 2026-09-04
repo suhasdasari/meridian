@@ -49,13 +49,60 @@ export function googleCountryFeeds(iso: string, name: string): Feed[] {
       kind: "rss",
       domain: "news.google.com",
     },
-    GN("WORLD", gl, `Google News World (${name})`, "International", "affairs"),
+    {
+      id: `gn-search-${gl.toLowerCase()}`,
+      name: `Google News ${name} search`,
+      url: `https://news.google.com/rss/search?q=${encodeURIComponent(`${name} when:1d`)}&hl=en&gl=${gl}&ceid=${gl}:en`,
+      region: "International",
+      desk: "affairs",
+      kind: "rss",
+      domain: "news.google.com",
+    },
     GN("NATION", gl, `Google News ${name} nation`, "International", "affairs"),
     GN("BUSINESS", gl, `Google News Business (${name})`, "International", "planet"),
     GN("SCIENCE", gl, `Google News Science (${name})`, "International", "planet"),
     GN("HEALTH", gl, `Google News Health (${name})`, "International", "planet"),
     GN("TECHNOLOGY", gl, `Google News Technology (${name})`, "International", "planet"),
   ];
+}
+
+/** GDELT uses FIPS-ish sourcecountry codes that mostly match ISO-2. */
+const GDELT_CC: Record<string, string> = {
+  GB: "UK",
+  DE: "GM",
+  JP: "JA",
+  KR: "KS",
+  CN: "CH",
+  RU: "RS",
+  ZA: "SF",
+  AT: "AU",
+  AU: "AS",
+  GE: "GG",
+};
+
+export function gdeltCountryFeed(iso: string, name: string, region: Region): Feed {
+  const cc = GDELT_CC[iso] ?? iso;
+  return {
+    id: `gdelt-${iso.toLowerCase()}`,
+    name: `GDELT ${name}`,
+    url: `https://api.gdeltproject.org/api/v2/doc/doc?query=sourcecountry:${cc}%20sourcelang:english&mode=ArtList&maxrecords=50&format=json&sort=DateDesc`,
+    region,
+    desk: "affairs",
+    kind: "gdelt",
+    domain: "gdeltproject.org",
+  };
+}
+
+export function bingCountryFeed(iso: string, name: string, region: Region): Feed {
+  return {
+    id: `bing-${iso.toLowerCase()}`,
+    name: `Bing News ${name}`,
+    url: `https://www.bing.com/news/search?q=${encodeURIComponent(name)}&format=RSS`,
+    region,
+    desk: "affairs",
+    kind: "rss",
+    domain: "bing.com",
+  };
 }
 
 /** World mix: Google News World from geographically spread editions + public-broadcaster RSS + open APIs. */
@@ -376,6 +423,24 @@ export const REGION_FEEDS: Record<string, Feed[]> = {
       kind: "rss",
       domain: "thehindu.com",
     },
+    {
+      id: "indian-express",
+      name: "Indian Express",
+      url: "https://indianexpress.com/section/india/feed/",
+      region: "Asia",
+      desk: "affairs",
+      kind: "rss",
+      domain: "indianexpress.com",
+    },
+    {
+      id: "bbc-india",
+      name: "BBC India",
+      url: "https://feeds.bbci.co.uk/news/world/asia/india/rss.xml",
+      region: "Asia",
+      desk: "affairs",
+      kind: "rss",
+      domain: "bbc.co.uk",
+    },
   ],
   PK: [
     {
@@ -388,6 +453,17 @@ export const REGION_FEEDS: Record<string, Feed[]> = {
       domain: "dawn.com",
     },
   ],
+  BD: [
+    {
+      id: "hindu-bd",
+      name: "The Hindu",
+      url: "https://www.thehindu.com/news/international/feeder/default.rss",
+      region: "Asia",
+      desk: "affairs",
+      kind: "rss",
+      domain: "thehindu.com",
+    },
+  ],
   GB: [
     {
       id: "bbc-uk",
@@ -397,6 +473,15 @@ export const REGION_FEEDS: Record<string, Feed[]> = {
       desk: "affairs",
       kind: "rss",
       domain: "bbc.co.uk",
+    },
+    {
+      id: "guardian-uk",
+      name: "The Guardian UK",
+      url: "https://www.theguardian.com/uk-news/rss",
+      region: "Europe",
+      desk: "affairs",
+      kind: "rss",
+      domain: "theguardian.com",
     },
   ],
   US: [
@@ -408,6 +493,24 @@ export const REGION_FEEDS: Record<string, Feed[]> = {
       desk: "affairs",
       kind: "rss",
       domain: "npr.org",
+    },
+    {
+      id: "nyt-us",
+      name: "NYT US",
+      url: "https://rss.nytimes.com/services/xml/rss/nyt/US.xml",
+      region: "Americas",
+      desk: "affairs",
+      kind: "rss",
+      domain: "nytimes.com",
+    },
+    {
+      id: "pbs-us",
+      name: "PBS NewsHour",
+      url: "https://www.pbs.org/newshour/feeds/rss/headlines",
+      region: "Americas",
+      desk: "affairs",
+      kind: "rss",
+      domain: "pbs.org",
     },
   ],
   JP: [
@@ -432,6 +535,17 @@ export const REGION_FEEDS: Record<string, Feed[]> = {
       domain: "abc.net.au",
     },
   ],
+  NZ: [
+    {
+      id: "rnz-nz",
+      name: "RNZ",
+      url: "https://www.rnz.co.nz/rss/national.xml",
+      region: "Oceania",
+      desk: "affairs",
+      kind: "rss",
+      domain: "rnz.co.nz",
+    },
+  ],
   CA: [
     {
       id: "cbc-top",
@@ -454,6 +568,61 @@ export const REGION_FEEDS: Record<string, Feed[]> = {
       domain: "dw.com",
     },
   ],
+  FR: [
+    {
+      id: "france24-fr",
+      name: "France 24",
+      url: "https://www.france24.com/en/france/rss",
+      region: "Europe",
+      desk: "affairs",
+      kind: "rss",
+      domain: "france24.com",
+    },
+  ],
+  IE: [
+    {
+      id: "rte-ie",
+      name: "RTÉ",
+      url: "https://www.rte.ie/rss/news.xml",
+      region: "Europe",
+      desk: "affairs",
+      kind: "rss",
+      domain: "rte.ie",
+    },
+  ],
+  SG: [
+    {
+      id: "cna-sg",
+      name: "CNA",
+      url: "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml&category=10416",
+      region: "Asia",
+      desk: "affairs",
+      kind: "rss",
+      domain: "channelnewsasia.com",
+    },
+  ],
+  KR: [
+    {
+      id: "koreaherald-kr",
+      name: "Korea Herald",
+      url: "https://www.koreaherald.com/rss",
+      region: "Asia",
+      desk: "affairs",
+      kind: "rss",
+      domain: "koreaherald.com",
+    },
+  ],
+  ID: [
+    {
+      id: "jakarta-post-id",
+      name: "Jakarta Post",
+      url: "https://www.thejakartapost.com/news/rss",
+      region: "Asia",
+      desk: "affairs",
+      kind: "rss",
+      domain: "thejakartapost.com",
+    },
+  ],
   NG: [
     {
       id: "africanews-ng",
@@ -463,6 +632,83 @@ export const REGION_FEEDS: Record<string, Feed[]> = {
       desk: "affairs",
       kind: "rss",
       domain: "africanews.com",
+    },
+  ],
+  ZA: [
+    {
+      id: "africanews-za",
+      name: "Africanews",
+      url: "https://www.africanews.com/feed/",
+      region: "Africa",
+      desk: "affairs",
+      kind: "rss",
+      domain: "africanews.com",
+    },
+  ],
+  KE: [
+    {
+      id: "africanews-ke",
+      name: "Africanews",
+      url: "https://www.africanews.com/feed/",
+      region: "Africa",
+      desk: "affairs",
+      kind: "rss",
+      domain: "africanews.com",
+    },
+  ],
+  EG: [
+    {
+      id: "africanews-eg",
+      name: "Africanews",
+      url: "https://www.africanews.com/feed/",
+      region: "Africa",
+      desk: "affairs",
+      kind: "rss",
+      domain: "africanews.com",
+    },
+  ],
+  CN: [
+    {
+      id: "scmp-cn",
+      name: "South China Morning Post",
+      url: "https://www.scmp.com/rss/91/feed",
+      region: "Asia",
+      desk: "affairs",
+      kind: "rss",
+      domain: "scmp.com",
+    },
+  ],
+  HK: [
+    {
+      id: "scmp-hk",
+      name: "South China Morning Post",
+      url: "https://www.scmp.com/rss/91/feed",
+      region: "Asia",
+      desk: "affairs",
+      kind: "rss",
+      domain: "scmp.com",
+    },
+  ],
+  ES: [
+    {
+      id: "elpais-es",
+      name: "El País English",
+      url: "https://feeds.elpais.com/mrss-s/pages/ep/site/english.elpais.com/portada",
+      region: "Europe",
+      desk: "affairs",
+      kind: "rss",
+      domain: "elpais.com",
+    },
+  ],
+  MX: [
+    {
+      id: "elpais-mx",
+      name: "El País English",
+      url: "https://feeds.elpais.com/mrss-s/pages/ep/site/english.elpais.com/portada",
+      region: "Americas",
+      desk: "affairs",
+      kind: "rss",
+      domain: "elpais.com",
     },
   ],
 };

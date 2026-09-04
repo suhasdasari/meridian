@@ -51,21 +51,49 @@ export function stripHtml(input: string): string {
     .trim();
 }
 
+function salvageExcerpt(text: string, title: string): string {
+  const cleaned = text.replace(/\s+/g, " ").trim();
+  if (cleaned.length < 50) return "";
+  const withoutTitle = cleaned.startsWith(title) ? cleaned.slice(title.length).trim() : cleaned;
+  if (withoutTitle.length < 40) return "";
+  return withoutTitle.slice(0, 280);
+}
+
+function httpsUrl(url: string): string {
+  return url.replace(/^http:\/\//i, "https://");
+}
+
+function unwrapUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    const inner = parsed.searchParams.get("url");
+    if (inner && inner.startsWith("http")) return inner;
+  } catch {
+    /* keep original */
+  }
+  return url;
+}
+
 function firstImage(html: string, node: Record<string, unknown>): string | null {
-  const media = asArray(
-    (node["media:content"] as unknown) ??
-      node["media:thumbnail"] ??
-      node.enclosure,
-  );
-  for (const m of media) {
+  const candidates = [
+    ...asArray(node["media:content"]),
+    ...asArray(node["media:thumbnail"]),
+    ...asArray(node.enclosure),
+  ];
+  for (const m of candidates) {
     if (m && typeof m === "object") {
       const rec = m as Record<string, unknown>;
       const url = textOf(rec["@_url"] ?? rec.url);
-      if (url.startsWith("http")) return url;
+      const type = textOf(rec["@_type"] ?? rec.type).toLowerCase();
+      if (!url.startsWith("http")) continue;
+      if (type && !type.startsWith("image") && (type.includes("video") || type.includes("audio"))) continue;
+      return httpsUrl(url);
     }
   }
+  const newsImg = textOf(node["News:Image"]);
+  if (newsImg.startsWith("http")) return httpsUrl(newsImg);
   const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
-  if (match?.[1]?.startsWith("http")) return match[1];
+  if (match?.[1]?.startsWith("http")) return httpsUrl(match[1]);
   return null;
 }
 
@@ -175,7 +203,8 @@ export function parseRssXml(
       textOf(item["dc:creator"]) ||
       textOf(item["dc:publisher"]);
     const described = sourceFromDescription(rawDesc);
-    const sourceName = fromTitle.source || tagged || described || meta.name;
+    const bingSource = textOf(item["News:Source"]);
+    const sourceName = fromTitle.source || tagged || described || bingSource || meta.name;
     const title = fromTitle.source ? fromTitle.title : rawTitle;
     const linkVal = item.link;
     let url = "";
@@ -189,8 +218,11 @@ export function parseRssXml(
     } else {
       url = textOf(linkVal) || textOf(item.guid) || textOf(item.id);
     }
+    url = unwrapUrl(url);
 
-    const excerpt = meta.origin.startsWith("gn-") ? "" : stripHtml(rawDesc);
+    const excerpt = meta.origin.startsWith("gn-")
+      ? salvageExcerpt(stripHtml(rawDesc), title)
+      : stripHtml(rawDesc);
     const published = parseDate(
       textOf(item.pubDate) ||
         textOf(item.published) ||

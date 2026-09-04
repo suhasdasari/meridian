@@ -1,7 +1,9 @@
 import type { Article, DeskPayload } from "./types";
-import { clusterArticles, pickLead } from "./cluster";
+import { clusterArticles, pickGallery, pickLead } from "./cluster";
 import { findCountry } from "./countries";
 import {
+  bingCountryFeed,
+  gdeltCountryFeed,
   googleCountryFeeds,
   REGION_FEEDS,
   WORLD_FEEDS,
@@ -17,9 +19,9 @@ import {
 
 const CACHE_TTL_MS = 90_000;
 const STALE_MS = 12 * 60_000;
-const FETCH_TIMEOUT_MS = 4000;
+const FETCH_TIMEOUT_MS = 5500;
 const CONCURRENCY = 10;
-const BUDGET_MS = 7500;
+const BUDGET_MS = 10000;
 
 type CacheEntry = {
   at: number;
@@ -102,7 +104,7 @@ function parseFeed(feed: Feed, body: string): Article[] {
 
 async function loadFeed(feed: Feed): Promise<CacheEntry> {
   const url = feed.kind === "wikipedia" ? wikipediaFeaturedUrl() : feed.url;
-  const cached = feedCache.get(`${feed.id}:v4`);
+  const cached = feedCache.get(`${feed.id}:v6`);
   const now = Date.now();
   if (cached && now - cached.at < CACHE_TTL_MS) return cached;
 
@@ -113,12 +115,12 @@ async function loadFeed(feed: Feed): Promise<CacheEntry> {
       origin: feed.id,
     }));
     const entry: CacheEntry = { at: now, articles, ok: true };
-    feedCache.set(`${feed.id}:v4`, entry);
+    feedCache.set(`${feed.id}:v6`, entry);
     return entry;
   } catch {
     if (cached && now - cached.at < STALE_MS) return cached;
     const entry: CacheEntry = { at: now, articles: [], ok: false };
-    feedCache.set(`${feed.id}:v4`, entry);
+    feedCache.set(`${feed.id}:v6`, entry);
     return entry;
   }
 }
@@ -127,15 +129,12 @@ function feedsFor(country: string): Feed[] {
   if (country === "WORLD") return WORLD_FEEDS;
   const info = findCountry(country);
   const local = REGION_FEEDS[info.code] ?? [];
-  const backbone = WORLD_FEEDS.filter(
-    (f) =>
-      f.id.startsWith("gn-world-") ||
-      f.id === "un-news" ||
-      f.id === "gdelt" ||
-      f.id === "reliefweb" ||
-      f.id === "wikipedia-news",
-  );
-  return [...googleCountryFeeds(info.code, info.name), ...local, ...backbone];
+  return [
+    ...local,
+    bingCountryFeed(info.code, info.name, info.region),
+    ...googleCountryFeeds(info.code, info.name),
+    gdeltCountryFeed(info.code, info.name, info.region),
+  ];
 }
 
 function dedupe(articles: Article[]): Article[] {
@@ -161,7 +160,7 @@ export async function loadDesk(countryCode: string): Promise<DeskPayload> {
   const started = Date.now();
   const results = await mapPool(feeds, CONCURRENCY, async (feed) => {
     if (Date.now() - started > BUDGET_MS) {
-      return feedCache.get(`${feed.id}:v4`) ?? { at: 0, articles: [], ok: false };
+      return feedCache.get(`${feed.id}:v6`) ?? { at: 0, articles: [], ok: false };
     }
     return loadFeed(feed);
   });
@@ -177,28 +176,55 @@ export async function loadDesk(countryCode: string): Promise<DeskPayload> {
   }
 
   const articles = dedupe(collected);
-  const forCluster = articles.slice(0, 140);
+  const isWorld = country.code === "WORLD";
+  const forCluster = articles.slice(0, isWorld ? 140 : 220);
   const clusters = clusterArticles(forCluster);
-  const lead = pickLead(clusters);
 
-  const used = new Set(lead ? lead.articles.map((a) => a.id) : []);
-  const rest = clusters.filter((c) => c.id !== lead?.id);
-  const affairs = rest.filter((c) => c.desk === "affairs").slice(0, 16);
-  const planet = rest.filter((c) => c.desk === "planet").slice(0, 16);
+  if (isWorld) {
+    const lead = pickLead(clusters);
+    const used = new Set(lead ? lead.articles.map((a) => a.id) : []);
+    const rest = clusters.filter((c) => c.id !== lead?.id);
+    const affairs = rest.filter((c) => c.desk === "affairs").slice(0, 16);
+    const planet = rest.filter((c) => c.desk === "planet").slice(0, 16);
+    const wire = articles
+      .filter((a) => !used.has(a.id))
+      .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))
+      .slice(0, 140);
+    return {
+      country: country.code,
+      countryName: country.name,
+      generatedAt: new Date().toISOString(),
+      lead,
+      gallery: [],
+      liners: [],
+      wire,
+      affairs,
+      planet,
+      sourceCount: okNames.size,
+      articleCount: articles.length,
+      failedSources,
+    };
+  }
 
-  const wire = articles
+  const gallery = pickGallery(clusters, articles, 10);
+  const used = new Set(gallery.flatMap((c) => c.articles.map((a) => a.id)));
+  const remaining = articles
     .filter((a) => !used.has(a.id))
-    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))
-    .slice(0, 140);
+    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+  const liners = remaining.slice(0, 28);
+  const linerIds = new Set(liners.map((a) => a.id));
+  const wire = remaining.filter((a) => !linerIds.has(a.id)).slice(0, 160);
 
   return {
     country: country.code,
     countryName: country.name,
     generatedAt: new Date().toISOString(),
-    lead,
+    lead: gallery[0] ?? null,
+    gallery,
+    liners,
     wire,
-    affairs,
-    planet,
+    affairs: [],
+    planet: [],
     sourceCount: okNames.size,
     articleCount: articles.length,
     failedSources,

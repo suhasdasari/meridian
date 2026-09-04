@@ -40,6 +40,8 @@ export type DeskPayload = {
   countryName: string;
   generatedAt: string;
   lead: Cluster | null;
+  gallery: Cluster[];
+  liners: Article[];
   wire: Article[];
   affairs: Cluster[];
   planet: Cluster[];

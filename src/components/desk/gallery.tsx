@@ -19,19 +19,17 @@ export function CountryGallery({
 }) {
   return (
     <section>
-      <div className="mb-3 flex items-end justify-between gap-3">
-        <div>
-          <p className="font-mono text-xs tracking-kicker text-subtle uppercase">Pictured</p>
-          <h2 className="mt-1 font-display text-2xl font-medium text-fg">
-            {countryName} · ten stories
-          </h2>
-        </div>
+      <div className="mb-2 flex items-baseline justify-between gap-3">
+        <h2 className="font-display text-xl font-medium text-fg">
+          <span className="font-mono text-xs tracking-kicker text-subtle uppercase">Pictured · </span>
+          {countryName} · ten
+        </h2>
         <p className="font-mono text-xs text-subtle tabular-nums">{clusters.length}</p>
       </div>
-      <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
-        {clusters.map((cluster, i) => (
-          <li key={cluster.id} className={i === 0 ? "col-span-2 lg:col-span-2" : undefined}>
-            <GalleryCard cluster={cluster} featured={i === 0} onOpen={onOpen} nowMs={nowMs} />
+      <ul className="pictured-grid">
+        {clusters.map((cluster) => (
+          <li key={cluster.id} className="min-h-0">
+            <GalleryCard cluster={cluster} onOpen={onOpen} nowMs={nowMs} />
           </li>
         ))}
       </ul>
@@ -41,12 +39,10 @@ export function CountryGallery({
 
 function GalleryCard({
   cluster,
-  featured,
   onOpen,
   nowMs,
 }: {
   cluster: Cluster;
-  featured: boolean;
   onOpen: (cluster: Cluster) => void;
   nowMs: number;
 }) {
@@ -63,36 +59,29 @@ function GalleryCard({
     <button
       type="button"
       onClick={() => onOpen(cluster)}
-      className="group flex h-full w-full flex-col overflow-hidden rounded-xl bg-surface text-left shadow-[var(--shadow-border)] transition-[box-shadow,filter] duration-200 ease-out hover:shadow-[var(--shadow-border-hover)] hover:brightness-110"
+      className="group relative h-full w-full overflow-hidden rounded-lg bg-surface text-left shadow-[var(--shadow-border)] transition-[box-shadow,filter] duration-200 ease-out hover:shadow-[var(--shadow-border-hover)] hover:brightness-110"
     >
-      <div className={cn("h-0.5 w-full", BEAT_BAR[cluster.beat])} />
-      <div className="relative aspect-video overflow-hidden bg-elevated">
-        <p className="absolute inset-0 flex items-end p-3 font-display text-xl leading-tight text-subtle">
-          {source}
-        </p>
-        <StoryImage
-          src={cluster.imageUrl}
-          alt=""
-          className="absolute inset-0 size-full transition-transform duration-200 ease-out group-hover:scale-105"
-        />
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-bg via-bg/80 to-transparent px-3 pt-10 pb-3 opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100">
-          <p className="line-clamp-4 text-sm leading-relaxed text-fg">{description}</p>
-        </div>
-      </div>
-      <div className="flex flex-1 flex-col px-3 py-3">
+      <span className={cn("absolute inset-x-0 top-0 z-10 h-0.5", BEAT_BAR[cluster.beat])} />
+      <p className="absolute inset-0 flex items-end p-3 font-display text-lg leading-tight text-subtle">
+        {source}
+      </p>
+      <StoryImage
+        src={cluster.imageUrl}
+        alt=""
+        className="absolute inset-0 size-full transition-transform duration-200 ease-out group-hover:scale-105"
+      />
+      <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-bg via-bg/75 to-transparent px-2.5 pt-8 pb-2.5">
         <BeatKicker beat={cluster.beat} />
-        <p
-          className={cn(
-            "font-display font-medium leading-snug text-fg",
-            featured ? "mt-1.5 text-xl md:text-2xl" : "mt-1.5 text-base",
-          )}
-        >
+        <p className="mt-1 line-clamp-2 font-display text-sm font-medium leading-snug text-fg">
           {cluster.title}
         </p>
-        <p className="mt-2 font-mono text-xs text-subtle">
+        <p className="mt-1 truncate font-mono text-xs text-subtle">
           {source}
           <span> · {formatAge(cluster.publishedAt, nowMs)}</span>
         </p>
+      </div>
+      <div className="absolute inset-0 z-20 bg-bg/90 px-3 py-3 opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100">
+        <p className="line-clamp-6 text-sm leading-relaxed text-fg">{description}</p>
       </div>
     </button>
   );

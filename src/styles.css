@@ -138,6 +138,24 @@
   animation-play-state: paused;
 }
 
+.pictured-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+  gap: 0.5rem;
+  height: calc(100svh - 20rem);
+  min-height: 22rem;
+}
+
+@media (min-width: 768px) {
+  .pictured-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    height: calc(100svh - 16.5rem);
+    min-height: 20rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .live-dot,
   .enter,

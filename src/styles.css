@@ -48,9 +48,8 @@
   html,
   body,
   #app {
-    height: 100%;
-    height: 100dvh;
-    overflow: hidden;
+    min-height: 100%;
+    min-height: 100dvh;
     background: var(--color-bg);
     color: var(--color-fg);
   }
@@ -58,7 +57,18 @@
   body {
     font-family: var(--font-sans);
     line-height: 1.5;
+    overflow-x: hidden;
     overscroll-behavior: none;
+  }
+
+  @media (min-width: 768px) {
+    html,
+    body,
+    #app {
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+    }
   }
 
   h1,
@@ -141,18 +151,55 @@
 }
 
 .pictured-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(5, minmax(0, 1fr));
-  gap: 0.4rem;
-  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: auto;
   min-height: 0;
+}
+
+.gallery-card {
+  height: auto;
+}
+
+.gallery-photo {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  flex: none;
+}
+
+.gallery-caption {
+  position: static;
+  padding: 0.65rem 0.75rem 0.8rem;
+  background: var(--color-surface);
 }
 
 @media (min-width: 768px) {
   .pictured-grid {
+    display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: 0.4rem;
+    height: 100%;
+  }
+
+  .gallery-card {
+    height: 100%;
+  }
+
+  .gallery-photo {
+    flex: 1 1 auto;
+    aspect-ratio: auto;
+    height: 100%;
+  }
+
+  .gallery-caption {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 10;
+    padding: 2rem 0.65rem 0.65rem;
+    background: linear-gradient(to top, var(--color-bg), rgb(12 12 11 / 0.75), transparent);
   }
 }
 
@@ -166,7 +213,8 @@
 
 .desk-world {
   grid-template-columns: 1fr;
-  grid-template-rows: minmax(0, 1.15fr) auto minmax(0, 0.85fr);
+  grid-template-rows: auto auto minmax(18rem, 42vh);
+  height: auto;
   grid-template-areas:
     "pics"
     "tabs"
@@ -175,11 +223,19 @@
 
 .desk-country {
   grid-template-columns: 1fr;
-  grid-template-rows: minmax(0, 1.2fr) auto minmax(0, 0.8fr);
+  grid-template-rows: auto auto minmax(18rem, 42vh);
+  height: auto;
   grid-template-areas:
     "pics"
     "tabs"
     "panel";
+}
+
+@media (min-width: 768px) {
+  .desk-world,
+  .desk-country {
+    height: 100%;
+  }
 }
 
 @media (min-width: 1024px) {

@@ -126,7 +126,7 @@ function DeskInner({ initial }: { initial: DeskPayload }) {
   }
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-bg text-fg">
+    <div className="flex min-h-dvh flex-col bg-bg text-fg md:h-dvh md:overflow-hidden">
       <Masthead
         country={country}
         onCountry={setCountry}
@@ -145,7 +145,7 @@ function DeskInner({ initial }: { initial: DeskPayload }) {
         </div>
       ) : null}
 
-      <main className="min-h-0 flex-1 px-2 py-2 md:px-3">
+      <main className="min-h-0 flex-1 overflow-y-auto px-2 py-2 md:overflow-hidden md:px-3">
         {query.isError && !query.data ? (
           <p className="rounded-lg bg-surface px-5 py-8 text-sm text-muted shadow-[var(--shadow-border)]">
             The desk could not reach live feeds just now. Try again in a moment.

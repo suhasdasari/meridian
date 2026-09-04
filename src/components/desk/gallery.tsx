@@ -18,15 +18,15 @@ export function CountryGallery({
   nowMs: number;
 }) {
   return (
-    <section className="flex h-full min-h-0 flex-col">
+    <section className="flex min-h-0 flex-col md:h-full">
       <div className="mb-1.5 flex shrink-0 items-baseline justify-between gap-3">
-        <h2 className="font-display text-base font-medium text-fg">
+        <h2 className="font-display text-base font-medium text-fg md:text-base">
           <span className="font-mono text-xs tracking-kicker text-subtle uppercase">Pictured · </span>
           {countryName} · ten
         </h2>
         <p className="font-mono text-xs text-subtle tabular-nums">{clusters.length}</p>
       </div>
-      <ul className="pictured-grid min-h-0 flex-1">
+      <ul className="pictured-grid md:min-h-0 md:flex-1">
         {clusters.map((cluster) => (
           <li key={cluster.id} className="min-h-0">
             <GalleryCard cluster={cluster} onOpen={onOpen} nowMs={nowMs} />
@@ -59,29 +59,31 @@ function GalleryCard({
     <button
       type="button"
       onClick={() => onOpen(cluster)}
-      className="group relative h-full w-full overflow-hidden rounded-lg bg-surface text-left shadow-[var(--shadow-border)] transition-[box-shadow,filter] duration-200 ease-out hover:shadow-[var(--shadow-border-hover)] hover:brightness-110"
+      className="gallery-card group relative flex w-full flex-col overflow-hidden rounded-lg bg-surface text-left shadow-[var(--shadow-border)] transition-[box-shadow,filter] duration-200 ease-out hover:shadow-[var(--shadow-border-hover)] hover:brightness-110"
     >
       <span className={cn("absolute inset-x-0 top-0 z-10 h-0.5", BEAT_BAR[cluster.beat])} />
-      <p className="absolute inset-0 flex items-end p-3 font-display text-lg leading-tight text-subtle">
-        {source}
-      </p>
-      <StoryImage
-        src={cluster.imageUrl}
-        alt=""
-        className="absolute inset-0 size-full transition-transform duration-200 ease-out group-hover:scale-105"
-      />
-      <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-bg via-bg/75 to-transparent px-2.5 pt-8 pb-2.5">
+      <div className="gallery-photo overflow-hidden bg-elevated">
+        <p className="absolute inset-0 flex items-end p-3 font-display text-lg leading-tight text-subtle">
+          {source}
+        </p>
+        <StoryImage
+          src={cluster.imageUrl}
+          alt=""
+          className="absolute inset-0 size-full transition-transform duration-200 ease-out group-hover:scale-105"
+        />
+        <div className="gallery-hover absolute inset-0 z-20 bg-bg/90 px-3 py-3 opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100 max-md:hidden">
+          <p className="line-clamp-6 text-sm leading-relaxed text-fg">{description}</p>
+        </div>
+      </div>
+      <div className="gallery-caption">
         <BeatKicker beat={cluster.beat} />
-        <p className="mt-1 line-clamp-2 font-display text-sm font-medium leading-snug text-fg">
+        <p className="mt-1 font-display text-base font-medium leading-snug text-fg md:line-clamp-2 md:text-sm">
           {cluster.title}
         </p>
         <p className="mt-1 truncate font-mono text-xs text-subtle">
           {source}
           <span> · {formatAge(cluster.publishedAt, nowMs)}</span>
         </p>
-      </div>
-      <div className="absolute inset-0 z-20 bg-bg/90 px-3 py-3 opacity-0 transition-opacity duration-200 ease-out group-hover:opacity-100">
-        <p className="line-clamp-6 text-sm leading-relaxed text-fg">{description}</p>
       </div>
     </button>
   );

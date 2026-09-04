@@ -3,6 +3,7 @@
 import type { Cluster } from "@/lib/news/types";
 import { formatAge } from "@/lib/news/format";
 import { clusterPeek, usePeek, usePeekHandlers } from "./peek";
+import { BeatKicker } from "./beat";
 
 function ColumnRow({
   cluster,
@@ -26,6 +27,7 @@ function ColumnRow({
         }}
         className="w-full py-3.5 text-left transition-opacity duration-150 hover:opacity-80"
       >
+        <BeatKicker beat={cluster.beat} className="mb-1" />
         <p className="font-display text-lg font-medium leading-snug text-fg">{cluster.title}</p>
         <p className="mt-1.5 font-mono text-xs text-subtle">
           {cluster.sourceCount > 1

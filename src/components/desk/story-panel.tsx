@@ -5,6 +5,7 @@ import type { Article, Cluster } from "@/lib/news/types";
 import { formatAge, uniqueNames } from "@/lib/news/format";
 import { Button } from "@/components/ui/button";
 import { StoryImage } from "./story-image";
+import { BeatKicker } from "./beat";
 
 export function StoryPanel({
   cluster,
@@ -28,8 +29,9 @@ export function StoryPanel({
       <aside className="relative flex h-full w-full max-w-lg flex-col bg-surface shadow-[var(--shadow-border)]">
         <header className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
           <div>
-            <p className="font-mono text-xs tracking-kicker text-mark uppercase">
+            <p className="flex flex-wrap items-center gap-2 font-mono text-xs tracking-kicker text-mark uppercase">
               {cluster.major ? "Major" : "Story"}
+              <BeatKicker beat={cluster.beat} />
               <span className="text-subtle"> · {cluster.sourceCount} outlets</span>
             </p>
             <p className="mt-1 font-mono text-xs text-muted">{formatAge(cluster.publishedAt, nowMs)}</p>
@@ -112,5 +114,6 @@ export function clusterFromArticle(article: Article): Cluster {
     regions: [article.region],
     desk: article.desk,
     major: false,
+    beat: article.beat,
   };
 }

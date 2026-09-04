@@ -1,5 +1,6 @@
 import { hashId } from "@/lib/utils";
 import type { Article, Cluster, DeskKind, Region } from "./types";
+import { majorityBeat } from "./beats";
 
 const STOP = new Set([
   "the",
@@ -150,6 +151,11 @@ function toCluster(articles: Article[]): Cluster {
     regions: regionsOf(sorted),
     desk,
     major,
+    beat: majorityBeat(
+      sorted.map((a) => a.beat),
+      pickTitle(sorted),
+      sorted.find((a) => a.excerpt.length > 40)?.excerpt ?? sorted[0]?.excerpt ?? "",
+    ),
   };
 }
 
@@ -232,6 +238,7 @@ export function pickGallery(clusters: Cluster[], articles: Article[] = [], n = 1
       regions: [a.region],
       desk: a.desk,
       major: false,
+      beat: a.beat,
     };
     if (push(filled)) return out;
   }

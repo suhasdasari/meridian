@@ -1,3 +1,5 @@
+import type { Beat } from "./beats";
+
 export type Region =
   | "Africa"
   | "Americas"
@@ -20,6 +22,7 @@ export type Article = {
   imageUrl: string | null;
   desk: DeskKind;
   origin: string;
+  beat: Beat;
 };
 
 export type Cluster = {
@@ -33,6 +36,7 @@ export type Cluster = {
   regions: Region[];
   desk: DeskKind;
   major: boolean;
+  beat: Beat;
 };
 
 export type DeskPayload = {

@@ -104,7 +104,7 @@ function parseFeed(feed: Feed, body: string): Article[] {
 
 async function loadFeed(feed: Feed): Promise<CacheEntry> {
   const url = feed.kind === "wikipedia" ? wikipediaFeaturedUrl() : feed.url;
-  const cached = feedCache.get(`${feed.id}:v6`);
+  const cached = feedCache.get(`${feed.id}:v7`);
   const now = Date.now();
   if (cached && now - cached.at < CACHE_TTL_MS) return cached;
 
@@ -115,12 +115,12 @@ async function loadFeed(feed: Feed): Promise<CacheEntry> {
       origin: feed.id,
     }));
     const entry: CacheEntry = { at: now, articles, ok: true };
-    feedCache.set(`${feed.id}:v6`, entry);
+    feedCache.set(`${feed.id}:v7`, entry);
     return entry;
   } catch {
     if (cached && now - cached.at < STALE_MS) return cached;
     const entry: CacheEntry = { at: now, articles: [], ok: false };
-    feedCache.set(`${feed.id}:v6`, entry);
+    feedCache.set(`${feed.id}:v7`, entry);
     return entry;
   }
 }
@@ -160,7 +160,7 @@ export async function loadDesk(countryCode: string): Promise<DeskPayload> {
   const started = Date.now();
   const results = await mapPool(feeds, CONCURRENCY, async (feed) => {
     if (Date.now() - started > BUDGET_MS) {
-      return feedCache.get(`${feed.id}:v6`) ?? { at: 0, articles: [], ok: false };
+      return feedCache.get(`${feed.id}:v7`) ?? { at: 0, articles: [], ok: false };
     }
     return loadFeed(feed);
   });

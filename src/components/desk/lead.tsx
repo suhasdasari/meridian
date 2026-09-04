@@ -4,6 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 import type { Cluster } from "@/lib/news/types";
 import { formatAge, uniqueNames } from "@/lib/news/format";
 import { StoryImage } from "./story-image";
+import { BeatKicker } from "./beat";
 
 export function LeadStory({
   cluster,
@@ -29,8 +30,9 @@ export function LeadStory({
         className="group w-full rounded-xl bg-surface p-3 text-left shadow-[var(--shadow-border)] transition-[box-shadow] duration-150 hover:shadow-[var(--shadow-border-hover)] md:p-4"
       >
         <div className="flex items-center justify-between gap-3 px-1 pt-1">
-          <p className="font-mono text-xs tracking-kicker text-mark uppercase">
+          <p className="flex flex-wrap items-center gap-2 font-mono text-xs tracking-kicker text-mark uppercase">
             {cluster.major ? "Major" : "Lead"}
+            <BeatKicker beat={cluster.beat} />
             <span className="text-subtle"> · {cluster.sourceCount} independent outlets</span>
           </p>
           <p className="font-mono text-xs text-muted tabular-nums">{formatAge(cluster.publishedAt, nowMs)}</p>

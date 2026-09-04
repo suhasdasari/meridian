@@ -4,6 +4,7 @@ import type { Article } from "@/lib/news/types";
 import { formatStamp } from "@/lib/news/format";
 import { cn } from "@/lib/utils";
 import { articlePeek, usePeek, usePeekHandlers } from "./peek";
+import { BeatKicker, BeatRail } from "./beat";
 
 function WireRow({
   item,
@@ -26,18 +27,22 @@ function WireRow({
           onOpen(item);
         }}
         className={cn(
-          "grid w-full grid-cols-[3.25rem_minmax(0,1fr)] gap-2 rounded-md px-3 py-2.5 text-left transition-colors duration-150 hover:bg-elevated",
+          "grid w-full grid-cols-[0.5rem_3.25rem_minmax(0,1fr)] items-start gap-2 rounded-md px-3 py-2.5 text-left transition-colors duration-150 hover:bg-elevated",
           isNew && "bg-elevated/40",
         )}
       >
+        <BeatRail beat={item.beat} />
         <time dateTime={item.publishedAt} className="font-mono text-xs text-subtle tabular-nums">
           {formatStamp(item.publishedAt)}
         </time>
         <span className="min-w-0">
           <span className="block truncate text-sm text-fg">{item.title}</span>
-          <span className="mt-0.5 block truncate font-mono text-xs text-subtle">
-            {isNew ? "New · " : ""}
-            {item.source}
+          <span className="mt-0.5 flex items-center gap-2 truncate font-mono text-xs text-subtle">
+            <BeatKicker beat={item.beat} />
+            <span>
+              {isNew ? "New · " : ""}
+              {item.source}
+            </span>
           </span>
         </span>
       </button>

@@ -18,6 +18,14 @@
   --color-accent-fg: #0c0c0b;
   --color-mark: #c45c4a;
   --color-paper: #efece4;
+  --color-beat-money: #c4a15a;
+  --color-beat-conflict: #c45c4a;
+  --color-beat-crime: #b44a62;
+  --color-beat-accident: #c4844a;
+  --color-beat-civic: #7a9088;
+  --color-beat-politics: #7a88a8;
+  --color-beat-faith: #8f6e8a;
+  --color-beat-humor: #8a9a5a;
 
   --tracking-kicker: 0.18em;
   --tracking-display: -0.03em;

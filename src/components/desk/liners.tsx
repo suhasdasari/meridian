@@ -3,6 +3,7 @@
 import type { Article } from "@/lib/news/types";
 import { formatAge } from "@/lib/news/format";
 import { articlePeek, usePeek, usePeekHandlers } from "./peek";
+import { BeatKicker, BeatRail } from "./beat";
 
 export function OneLiners({
   items,
@@ -48,13 +49,17 @@ function LinerRow({
           peek.hideNow();
           onOpen(item);
         }}
-        className="-mx-2 grid w-full grid-cols-[2rem_minmax(0,1fr)] gap-3 rounded-md px-2 py-3 text-left transition-colors duration-150 hover:bg-elevated"
+        className="-mx-2 grid w-full grid-cols-[0.5rem_2rem_minmax(0,1fr)] items-start gap-3 rounded-md px-2 py-3 text-left transition-colors duration-150 hover:bg-elevated"
       >
+        <BeatRail beat={item.beat} />
         <span className="font-mono text-xs text-subtle tabular-nums">{String(index).padStart(2, "0")}</span>
         <span className="min-w-0">
           <span className="block truncate text-sm text-fg">{item.title}</span>
-          <span className="mt-0.5 block truncate font-mono text-xs text-subtle">
-            {item.source} · {formatAge(item.publishedAt, nowMs)}
+          <span className="mt-0.5 flex items-center gap-2 truncate font-mono text-xs text-subtle">
+            <BeatKicker beat={item.beat} />
+            <span>
+              {item.source} · {formatAge(item.publishedAt, nowMs)}
+            </span>
           </span>
         </span>
       </button>

@@ -180,8 +180,8 @@ function DeskInner({ initial }: { initial: DeskPayload }) {
         <footer className="mt-10 max-w-3xl pb-10 text-sm leading-relaxed text-subtle">
           <p>
             {isWorld
-              ? "Meridian does not editorialize, score sentiment, or rewrite headlines. The lead is the cluster with the most independent outlets in this cycle, weighted only by recency and geographic spread of coverage. World affairs and planet desks appear only on the world edition."
-              : `This is the ${data.countryName} desk. World affairs and planet run only on the world edition. Headlines are as published. The pictured ten are the most-covered local stories this cycle; one-liners and the wire carry the rest.`}
+              ? "Meridian does not editorialize, score sentiment, or rewrite headlines. The lead is the cluster with the most independent outlets in this cycle, weighted only by recency and geographic spread of coverage. World affairs and planet desks appear only on the world edition. Colour marks name a topic from the published words (money, conflict, crime, accident, civic, politics, faith, humor) — not a ranking."
+              : `This is the ${data.countryName} desk. World affairs and planet run only on the world edition. Headlines are as published. Colour marks are topical (money, conflict, crime, accident, civic, politics, faith, humor) from the published words — not a ranking.`}
           </p>
         </footer>
       </main>

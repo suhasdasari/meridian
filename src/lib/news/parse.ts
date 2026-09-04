@@ -2,6 +2,7 @@ import { XMLParser } from "fast-xml-parser";
 import { hashId } from "@/lib/utils";
 import type { Article, DeskKind, Region } from "./types";
 import { inferDesk, regionForDomain } from "./sources";
+import { inferBeat } from "./beats";
 
 const parser = new XMLParser({
   ignoreAttributes: false,
@@ -161,6 +162,7 @@ function toArticle(opts: {
     imageUrl: opts.imageUrl,
     desk: inferDesk(title, opts.desk),
     origin: opts.origin,
+    beat: inferBeat(title, opts.excerpt),
   };
 }
 

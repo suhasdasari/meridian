@@ -3,6 +3,7 @@
 import { findCountry } from "@/lib/news/countries";
 import { CountrySelect } from "./country-select";
 import { LiveClock } from "./clock";
+import { BeatLegend } from "./beat";
 
 export function Masthead({
   country,
@@ -51,11 +52,12 @@ export function Masthead({
           </div>
         </div>
       </div>
-      <div className="mx-auto flex max-w-7xl items-center px-4 pb-3 font-mono text-xs tracking-wider text-subtle uppercase md:px-6">
-        <p>
+      <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 pb-3 md:px-6">
+        <p className="font-mono text-xs tracking-wider text-subtle uppercase">
           {isWorld ? "World edition" : `${edition.name} desk`}
           {sourceCount > 0 ? ` · ${sourceCount} outlets this cycle` : ""}
         </p>
+        <BeatLegend />
       </div>
     </header>
   );

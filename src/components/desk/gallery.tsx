@@ -4,6 +4,7 @@ import type { Cluster } from "@/lib/news/types";
 import { formatAge } from "@/lib/news/format";
 import { cn } from "@/lib/utils";
 import { StoryImage } from "./story-image";
+import { BeatKicker, BEAT_BAR } from "./beat";
 
 export function CountryGallery({
   clusters,
@@ -64,6 +65,7 @@ function GalleryCard({
       onClick={() => onOpen(cluster)}
       className="group flex h-full w-full flex-col overflow-hidden rounded-xl bg-surface text-left shadow-[var(--shadow-border)] transition-[box-shadow,filter] duration-200 ease-out hover:shadow-[var(--shadow-border-hover)] hover:brightness-110"
     >
+      <div className={cn("h-0.5 w-full", BEAT_BAR[cluster.beat])} />
       <div className="relative aspect-video overflow-hidden bg-elevated">
         <p className="absolute inset-0 flex items-end p-3 font-display text-xl leading-tight text-subtle">
           {source}
@@ -78,10 +80,11 @@ function GalleryCard({
         </div>
       </div>
       <div className="flex flex-1 flex-col px-3 py-3">
+        <BeatKicker beat={cluster.beat} />
         <p
           className={cn(
             "font-display font-medium leading-snug text-fg",
-            featured ? "text-xl md:text-2xl" : "text-base",
+            featured ? "mt-1.5 text-xl md:text-2xl" : "mt-1.5 text-base",
           )}
         >
           {cluster.title}

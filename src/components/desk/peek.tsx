@@ -14,9 +14,11 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import type { Article, Cluster } from "@/lib/news/types";
+import type { Beat } from "@/lib/news/beats";
 import { formatAge } from "@/lib/news/format";
 import { cn } from "@/lib/utils";
 import { StoryImage } from "./story-image";
+import { BeatKicker } from "./beat";
 
 const CARD_W = 320;
 const CARD_H = 400;
@@ -29,6 +31,7 @@ export type PeekStory = {
   imageUrl: string | null;
   source: string;
   publishedAt: string;
+  beat: Beat;
 };
 
 export function articlePeek(article: Article): PeekStory {
@@ -38,6 +41,7 @@ export function articlePeek(article: Article): PeekStory {
     imageUrl: article.imageUrl,
     source: article.source,
     publishedAt: article.publishedAt,
+    beat: article.beat,
   };
 }
 
@@ -51,6 +55,7 @@ export function clusterPeek(cluster: Cluster): PeekStory {
         ? `${cluster.sourceCount} outlets`
         : (cluster.articles[0]?.source ?? ""),
     publishedAt: cluster.publishedAt,
+    beat: cluster.beat,
   };
 }
 
@@ -175,6 +180,7 @@ export function PeekProvider({ children }: { children: ReactNode }) {
                 />
               ) : null}
               <div className="px-4 py-3">
+                <BeatKicker beat={story.beat} className="mb-1.5" />
                 <p className="line-clamp-3 font-display text-lg font-medium leading-snug text-fg">
                   {story.title}
                 </p>

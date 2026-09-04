@@ -1,0 +1,521 @@
+import type { DeskKind, Region } from "./types";
+
+export type FeedKind = "rss" | "atom" | "gdelt" | "reliefweb" | "wikipedia";
+
+export type Feed = {
+  id: string;
+  name: string;
+  url: string;
+  region: Region;
+  desk: DeskKind;
+  kind: FeedKind;
+  domain: string;
+};
+
+const GN = (
+  topic: string,
+  gl: string,
+  name: string,
+  region: Region,
+  desk: DeskKind,
+): Feed => ({
+  id: `gn-${topic.toLowerCase()}-${gl.toLowerCase()}`,
+  name,
+  url: `https://news.google.com/rss/headlines/section/topic/${topic}?hl=en&gl=${gl}&ceid=${gl}:en`,
+  region,
+  desk,
+  kind: "rss",
+  domain: "news.google.com",
+});
+
+export function googleCountryFeeds(iso: string, name: string): Feed[] {
+  const gl = iso.toUpperCase();
+  return [
+    {
+      id: `gn-top-${gl.toLowerCase()}`,
+      name: `Google News ${name}`,
+      url: `https://news.google.com/rss?hl=en&gl=${gl}&ceid=${gl}:en`,
+      region: "International",
+      desk: "affairs",
+      kind: "rss",
+      domain: "news.google.com",
+    },
+    {
+      id: `gn-geo-${gl.toLowerCase()}`,
+      name: `Google News ${name} geo`,
+      url: `https://news.google.com/rss/headlines/section/geo/${encodeURIComponent(name)}?hl=en&gl=${gl}&ceid=${gl}:en`,
+      region: "International",
+      desk: "affairs",
+      kind: "rss",
+      domain: "news.google.com",
+    },
+    GN("WORLD", gl, `Google News World (${name})`, "International", "affairs"),
+    GN("NATION", gl, `Google News ${name} nation`, "International", "affairs"),
+    GN("BUSINESS", gl, `Google News Business (${name})`, "International", "planet"),
+    GN("SCIENCE", gl, `Google News Science (${name})`, "International", "planet"),
+    GN("HEALTH", gl, `Google News Health (${name})`, "International", "planet"),
+    GN("TECHNOLOGY", gl, `Google News Technology (${name})`, "International", "planet"),
+  ];
+}
+
+/** World mix: Google News World from geographically spread editions + public-broadcaster RSS + open APIs. */
+export const WORLD_FEEDS: Feed[] = [
+  GN("WORLD", "IN", "Google News World (India)", "Asia", "affairs"),
+  GN("WORLD", "NG", "Google News World (Nigeria)", "Africa", "affairs"),
+  GN("WORLD", "JP", "Google News World (Japan)", "Asia", "affairs"),
+  GN("WORLD", "BR", "Google News World (Brazil)", "Americas", "affairs"),
+  GN("WORLD", "DE", "Google News World (Germany)", "Europe", "affairs"),
+  GN("WORLD", "AU", "Google News World (Australia)", "Oceania", "affairs"),
+  GN("WORLD", "EG", "Google News World (Egypt)", "Africa", "affairs"),
+  GN("WORLD", "SG", "Google News World (Singapore)", "Asia", "affairs"),
+  GN("WORLD", "GB", "Google News World (UK)", "Europe", "affairs"),
+  GN("WORLD", "MX", "Google News World (Mexico)", "Americas", "affairs"),
+  GN("BUSINESS", "SG", "Google News Business", "International", "planet"),
+  GN("SCIENCE", "GB", "Google News Science", "International", "planet"),
+  GN("HEALTH", "IN", "Google News Health", "International", "planet"),
+  GN("TECHNOLOGY", "DE", "Google News Technology", "International", "planet"),
+
+  {
+    id: "bbc-world",
+    name: "BBC World",
+    url: "https://feeds.bbci.co.uk/news/world/rss.xml",
+    region: "Europe",
+    desk: "affairs",
+    kind: "rss",
+    domain: "bbc.co.uk",
+  },
+  {
+    id: "bbc-science",
+    name: "BBC Science",
+    url: "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
+    region: "Europe",
+    desk: "planet",
+    kind: "rss",
+    domain: "bbc.co.uk",
+  },
+  {
+    id: "bbc-business",
+    name: "BBC Business",
+    url: "https://feeds.bbci.co.uk/news/business/rss.xml",
+    region: "Europe",
+    desk: "planet",
+    kind: "rss",
+    domain: "bbc.co.uk",
+  },
+  {
+    id: "guardian-world",
+    name: "The Guardian World",
+    url: "https://www.theguardian.com/world/rss",
+    region: "Europe",
+    desk: "affairs",
+    kind: "rss",
+    domain: "theguardian.com",
+  },
+  {
+    id: "aljazeera",
+    name: "Al Jazeera",
+    url: "https://www.aljazeera.com/xml/rss/all.xml",
+    region: "Asia",
+    desk: "affairs",
+    kind: "rss",
+    domain: "aljazeera.com",
+  },
+  {
+    id: "dw",
+    name: "Deutsche Welle",
+    url: "https://rss.dw.com/rdf/rss-en-all",
+    region: "Europe",
+    desk: "affairs",
+    kind: "rss",
+    domain: "dw.com",
+  },
+  {
+    id: "france24",
+    name: "France 24",
+    url: "https://www.france24.com/en/rss",
+    region: "Europe",
+    desk: "affairs",
+    kind: "rss",
+    domain: "france24.com",
+  },
+  {
+    id: "nhk",
+    name: "NHK World",
+    url: "https://www3.nhk.or.jp/nhkworld/en/news/rss/",
+    region: "Asia",
+    desk: "affairs",
+    kind: "rss",
+    domain: "nhk.or.jp",
+  },
+  {
+    id: "abc-au",
+    name: "ABC Australia",
+    url: "https://www.abc.net.au/news/feed/51120/rss.xml",
+    region: "Oceania",
+    desk: "affairs",
+    kind: "rss",
+    domain: "abc.net.au",
+  },
+  {
+    id: "rnz",
+    name: "RNZ World",
+    url: "https://www.rnz.co.nz/rss/world.xml",
+    region: "Oceania",
+    desk: "affairs",
+    kind: "rss",
+    domain: "rnz.co.nz",
+  },
+  {
+    id: "cbc",
+    name: "CBC World",
+    url: "https://www.cbc.ca/webfeed/rss/rss-world",
+    region: "Americas",
+    desk: "affairs",
+    kind: "rss",
+    domain: "cbc.ca",
+  },
+  {
+    id: "npr",
+    name: "NPR",
+    url: "https://feeds.npr.org/1001/rss.xml",
+    region: "Americas",
+    desk: "affairs",
+    kind: "rss",
+    domain: "npr.org",
+  },
+  {
+    id: "pbs",
+    name: "PBS NewsHour",
+    url: "https://www.pbs.org/newshour/feeds/rss/headlines",
+    region: "Americas",
+    desk: "affairs",
+    kind: "rss",
+    domain: "pbs.org",
+  },
+  {
+    id: "hindu",
+    name: "The Hindu",
+    url: "https://www.thehindu.com/news/international/feeder/default.rss",
+    region: "Asia",
+    desk: "affairs",
+    kind: "rss",
+    domain: "thehindu.com",
+  },
+  {
+    id: "dawn",
+    name: "Dawn",
+    url: "https://www.dawn.com/feeds/world",
+    region: "Asia",
+    desk: "affairs",
+    kind: "rss",
+    domain: "dawn.com",
+  },
+  {
+    id: "cna",
+    name: "CNA",
+    url: "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml&category=6511",
+    region: "Asia",
+    desk: "affairs",
+    kind: "rss",
+    domain: "channelnewsasia.com",
+  },
+  {
+    id: "koreaherald",
+    name: "Korea Herald",
+    url: "https://www.koreaherald.com/rss",
+    region: "Asia",
+    desk: "affairs",
+    kind: "rss",
+    domain: "koreaherald.com",
+  },
+  {
+    id: "africanews",
+    name: "Africanews",
+    url: "https://www.africanews.com/feed/",
+    region: "Africa",
+    desk: "affairs",
+    kind: "rss",
+    domain: "africanews.com",
+  },
+  {
+    id: "allafrica",
+    name: "AllAfrica",
+    url: "https://allafrica.com/tools/headlines/rdf/latest/headlines.rdf",
+    region: "Africa",
+    desk: "affairs",
+    kind: "rss",
+    domain: "allafrica.com",
+  },
+  {
+    id: "elpais",
+    name: "El País English",
+    url: "https://feeds.elpais.com/mrss-s/pages/ep/site/english.elpais.com/portada",
+    region: "Europe",
+    desk: "affairs",
+    kind: "rss",
+    domain: "elpais.com",
+  },
+  {
+    id: "tass",
+    name: "TASS",
+    url: "https://tass.com/rss/v2.xml",
+    region: "Europe",
+    desk: "affairs",
+    kind: "rss",
+    domain: "tass.com",
+  },
+  {
+    id: "un-news",
+    name: "UN News",
+    url: "https://news.un.org/feed/subscribe/en/news/all/rss.xml",
+    region: "International",
+    desk: "affairs",
+    kind: "rss",
+    domain: "news.un.org",
+  },
+  {
+    id: "who",
+    name: "WHO",
+    url: "https://www.who.int/rss-feeds/news-english.xml",
+    region: "International",
+    desk: "planet",
+    kind: "rss",
+    domain: "who.int",
+  },
+  {
+    id: "nasa",
+    name: "NASA",
+    url: "https://www.nasa.gov/feed/",
+    region: "International",
+    desk: "planet",
+    kind: "rss",
+    domain: "nasa.gov",
+  },
+  {
+    id: "conversation",
+    name: "The Conversation",
+    url: "https://theconversation.com/articles.atom",
+    region: "International",
+    desk: "planet",
+    kind: "atom",
+    domain: "theconversation.com",
+  },
+  {
+    id: "euronews",
+    name: "Euronews",
+    url: "https://www.euronews.com/rss?format=mrss",
+    region: "Europe",
+    desk: "affairs",
+    kind: "rss",
+    domain: "euronews.com",
+  },
+  {
+    id: "rte",
+    name: "RTÉ",
+    url: "https://www.rte.ie/rss/news.xml",
+    region: "Europe",
+    desk: "affairs",
+    kind: "rss",
+    domain: "rte.ie",
+  },
+  {
+    id: "scmp",
+    name: "South China Morning Post",
+    url: "https://www.scmp.com/rss/91/feed",
+    region: "Asia",
+    desk: "affairs",
+    kind: "rss",
+    domain: "scmp.com",
+  },
+  {
+    id: "jakarta-post",
+    name: "Jakarta Post",
+    url: "https://www.thejakartapost.com/news/rss",
+    region: "Asia",
+    desk: "affairs",
+    kind: "rss",
+    domain: "thejakartapost.com",
+  },
+  {
+    id: "reliefweb",
+    name: "ReliefWeb",
+    url: "https://api.reliefweb.int/v1/reports?appname=meridian-desk&profile=list&limit=20&sort[]=date:desc",
+    region: "International",
+    desk: "affairs",
+    kind: "reliefweb",
+    domain: "reliefweb.int",
+  },
+  {
+    id: "gdelt",
+    name: "GDELT",
+    url: "https://api.gdeltproject.org/api/v2/doc/doc?query=sourcelang:english&mode=ArtList&maxrecords=40&format=json&sort=DateDesc",
+    region: "International",
+    desk: "affairs",
+    kind: "gdelt",
+    domain: "gdeltproject.org",
+  },
+  {
+    id: "wikipedia-news",
+    name: "Wikipedia Current Events",
+    url: "https://en.wikipedia.org/api/rest_v1/feed/featured/",
+    region: "International",
+    desk: "affairs",
+    kind: "wikipedia",
+    domain: "wikipedia.org",
+  },
+];
+
+export const REGION_FEEDS: Record<string, Feed[]> = {
+  IN: [
+    {
+      id: "hindu-national",
+      name: "The Hindu",
+      url: "https://www.thehindu.com/news/national/feeder/default.rss",
+      region: "Asia",
+      desk: "affairs",
+      kind: "rss",
+      domain: "thehindu.com",
+    },
+  ],
+  PK: [
+    {
+      id: "dawn-home",
+      name: "Dawn",
+      url: "https://www.dawn.com/feeds/home",
+      region: "Asia",
+      desk: "affairs",
+      kind: "rss",
+      domain: "dawn.com",
+    },
+  ],
+  GB: [
+    {
+      id: "bbc-uk",
+      name: "BBC UK",
+      url: "https://feeds.bbci.co.uk/news/uk/rss.xml",
+      region: "Europe",
+      desk: "affairs",
+      kind: "rss",
+      domain: "bbc.co.uk",
+    },
+  ],
+  US: [
+    {
+      id: "npr-national",
+      name: "NPR",
+      url: "https://feeds.npr.org/1003/rss.xml",
+      region: "Americas",
+      desk: "affairs",
+      kind: "rss",
+      domain: "npr.org",
+    },
+  ],
+  JP: [
+    {
+      id: "nhk-local",
+      name: "NHK World",
+      url: "https://www3.nhk.or.jp/nhkworld/en/news/rss/",
+      region: "Asia",
+      desk: "affairs",
+      kind: "rss",
+      domain: "nhk.or.jp",
+    },
+  ],
+  AU: [
+    {
+      id: "abc-au-top",
+      name: "ABC Australia",
+      url: "https://www.abc.net.au/news/feed/45910/rss.xml",
+      region: "Oceania",
+      desk: "affairs",
+      kind: "rss",
+      domain: "abc.net.au",
+    },
+  ],
+  CA: [
+    {
+      id: "cbc-top",
+      name: "CBC",
+      url: "https://www.cbc.ca/webfeed/rss/rss-topstories",
+      region: "Americas",
+      desk: "affairs",
+      kind: "rss",
+      domain: "cbc.ca",
+    },
+  ],
+  DE: [
+    {
+      id: "dw-de",
+      name: "Deutsche Welle",
+      url: "https://rss.dw.com/rdf/rss-en-all",
+      region: "Europe",
+      desk: "affairs",
+      kind: "rss",
+      domain: "dw.com",
+    },
+  ],
+  NG: [
+    {
+      id: "africanews-ng",
+      name: "Africanews",
+      url: "https://www.africanews.com/feed/",
+      region: "Africa",
+      desk: "affairs",
+      kind: "rss",
+      domain: "africanews.com",
+    },
+  ],
+};
+
+const PLANET_HINT =
+  /\b(climate|health|science|research|space|nasa|who\b|vaccine|disease|economy|market|inflation|tech|ai\b|cyber|energy|weather|earthquake|flood|wildfire|covid|virus|study)\b/i;
+
+export function inferDesk(title: string, fallback: DeskKind): DeskKind {
+  if (fallback === "planet") return "planet";
+  return PLANET_HINT.test(title) ? "planet" : "affairs";
+}
+
+const DOMAIN_REGION: Record<string, Region> = {
+  "bbc.co.uk": "Europe",
+  "bbc.com": "Europe",
+  "theguardian.com": "Europe",
+  "dw.com": "Europe",
+  "france24.com": "Europe",
+  "elpais.com": "Europe",
+  "euronews.com": "Europe",
+  "rte.ie": "Europe",
+  "tass.com": "Europe",
+  "reuters.com": "International",
+  "apnews.com": "Americas",
+  "npr.org": "Americas",
+  "pbs.org": "Americas",
+  "cbc.ca": "Americas",
+  "nytimes.com": "Americas",
+  "washingtonpost.com": "Americas",
+  "aljazeera.com": "Asia",
+  "thehindu.com": "Asia",
+  "dawn.com": "Asia",
+  "nhk.or.jp": "Asia",
+  "channelnewsasia.com": "Asia",
+  "scmp.com": "Asia",
+  "koreaherald.com": "Asia",
+  "thejakartapost.com": "Asia",
+  "africanews.com": "Africa",
+  "allafrica.com": "Africa",
+  "abc.net.au": "Oceania",
+  "rnz.co.nz": "Oceania",
+  "news.un.org": "International",
+  "who.int": "International",
+  "nasa.gov": "International",
+  "reliefweb.int": "International",
+  "wikipedia.org": "International",
+};
+
+export function regionForDomain(domain: string, fallback: Region): Region {
+  const host = domain.replace(/^www\./, "");
+  if (DOMAIN_REGION[host]) return DOMAIN_REGION[host];
+  for (const [key, region] of Object.entries(DOMAIN_REGION)) {
+    if (host.endsWith(key)) return region;
+  }
+  return fallback;
+}

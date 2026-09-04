@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" role="img" aria-label="Meridian">
+  <rect width="16" height="16" fill="#0c0c0b"/>
+  <circle cx="8" cy="8" r="6" fill="#efece4"/>
+  <rect x="7" y="2" width="2" height="12" fill="#0c0c0b"/>
+</svg>
